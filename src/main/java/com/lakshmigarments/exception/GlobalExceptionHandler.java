@@ -15,6 +15,12 @@ public class GlobalExceptionHandler {
 		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
 	}
 
+    // duplicate skill exception
+    @ExceptionHandler(DuplicateSkillException.class)
+    public ResponseEntity<String> handleDuplicateSkill(DuplicateSkillException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
+    }
+
     // inventory not found exception
     @ExceptionHandler(InventoryNotFoundException.class)
     public ResponseEntity<String> handleInventoryNotFound(InventoryNotFoundException ex) {
