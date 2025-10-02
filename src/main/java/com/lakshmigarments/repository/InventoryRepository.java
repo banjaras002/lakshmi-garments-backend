@@ -28,4 +28,6 @@ public interface InventoryRepository extends JpaRepository<Inventory, Long> {
 	Optional<Inventory> findByCategoryIdAndSubCategoryId(@Param("categoryId") Long categoryId,
 			@Param("subCategoryId") Long subCategoryId);
 
+	Optional<Inventory> findBySubCategoryName(String subCategoryName);
+
 }
