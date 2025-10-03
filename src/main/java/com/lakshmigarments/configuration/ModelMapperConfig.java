@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Configuration;
 import com.lakshmigarments.dto.BaleDTO;
 import com.lakshmigarments.dto.BatchResponseDTO;
 import com.lakshmigarments.dto.BatchResponseDTO.BatchSubCategoryResponseDTO;
-import com.lakshmigarments.dto.CreateSupplierDTO;
+import com.lakshmigarments.dto.SupplierRequestDTO;
 import com.lakshmigarments.dto.InvoiceDTO;
 import com.lakshmigarments.dto.LorryReceiptDTO;
 import com.lakshmigarments.model.Bale;
@@ -32,7 +32,7 @@ public class ModelMapperConfig {
         });
 		
 		modelMapper.typeMap(Bale.class, BaleDTO.class).addMappings(mapper -> {
-        	mapper.map(src -> src.getSubCategory().getCategory().getName(), BaleDTO::setCategory);
+        	mapper.map(src -> src.getCategory().getName(), BaleDTO::setCategory);
         	mapper.map(src -> src.getSubCategory().getName(), BaleDTO::setSubCategory);
         });
 		
