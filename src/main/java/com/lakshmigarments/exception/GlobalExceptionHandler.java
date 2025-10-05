@@ -123,4 +123,14 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
     }
 
+    @ExceptionHandler(DuplicateItemException.class)
+    public ResponseEntity<String> handleDuplicateItem(DuplicateItemException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(ItemNotFoundException.class)
+    public ResponseEntity<String> handleItemNotFound(ItemNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+    }
+
 }
