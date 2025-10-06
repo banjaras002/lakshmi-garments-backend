@@ -11,8 +11,8 @@ import org.springframework.stereotype.Service;
 
 import com.lakshmigarments.dto.BatchResponseDTO;
 import com.lakshmigarments.dto.BatchResponseDTO.BatchSubCategoryResponseDTO;
-import com.lakshmigarments.dto.CreateBatchDTO;
-import com.lakshmigarments.dto.CreateBatchSubCategoryDTO;
+import com.lakshmigarments.dto.BatchRequestDTO;
+import com.lakshmigarments.dto.BatchSubCategoryRequestDTO;
 import com.lakshmigarments.exception.BatchStatusNotFoundException;
 import com.lakshmigarments.exception.CategoryNotFoundException;
 import com.lakshmigarments.exception.DuplicateBatchException;
@@ -100,8 +100,8 @@ public class BatchService2 {
 				});
 	}
 
-	private void validateInventoryLevels(Long categoryId, List<CreateBatchSubCategoryDTO> subCategories) {
-		for (CreateBatchSubCategoryDTO subCategoryDTO : subCategories) {
+	private void validateInventoryLevels(Long categoryId, List<BatchSubCategoryRequestDTO> subCategories) {
+		for (BatchSubCategoryRequestDTO subCategoryDTO : subCategories) {
 			Long subCategoryId = subCategoryDTO.getSubCategoryID();
 			Long requestedQty = subCategoryDTO.getQuantity();
 	
@@ -115,7 +115,7 @@ public class BatchService2 {
 		}
 	}
 
-	public BatchResponseDTO createBatch(CreateBatchDTO createBatchDTO) {
+	public BatchResponseDTO createBatch(BatchRequestDTO createBatchDTO) {
 
 		Long categoryId = createBatchDTO.getCategoryID();
 		Long batchStatusId = createBatchDTO.getBatchStatusID();
@@ -128,7 +128,7 @@ public class BatchService2 {
 		LOGGER.info("BatchStatus: {}", batchStatus);
 
 		// validate the sub category IDs
-		for (CreateBatchSubCategoryDTO subCategoryDTO : createBatchDTO.getSubCategories()) {
+		for (BatchSubCategoryRequestDTO subCategoryDTO : createBatchDTO.getSubCategories()) {
 			Long subCategoryId = subCategoryDTO.getSubCategoryID();
 			SubCategory subCategory = validateSubCategory(subCategoryId);
 		}
@@ -146,7 +146,7 @@ public class BatchService2 {
 
 		List<BatchSubCategoryResponseDTO> batchSubCategoryResponseDTOs = new ArrayList<>();
 
-		for (CreateBatchSubCategoryDTO batchSubCategoryDTO : createBatchDTO.getSubCategories()) {
+		for (BatchSubCategoryRequestDTO batchSubCategoryDTO : createBatchDTO.getSubCategories()) {
 
 			Long subCategoryId = batchSubCategoryDTO.getSubCategoryID();
 			SubCategory subCategory = subCategoryRepository.findById(subCategoryId).get();

@@ -19,4 +19,6 @@ public interface JobworkRepository extends JpaRepository<Jobwork, Long>, JpaSpec
 
     Optional<Jobwork> findTop1ByOrderByJobworkNumberDesc();
 
+    List<Jobwork> findByBatchId(Long batchId);
+
 }

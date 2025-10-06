@@ -8,5 +8,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface ItemRepository extends JpaRepository<Item,Long>, JpaSpecificationExecutor<Item> {
     boolean existsByNameIgnoreCase(String name);
-    long deleteByItem(Item item);
+    void deleteById(Long id);
 }
