@@ -33,4 +33,7 @@ public class CreateBaleDTO {
 	
 	@NotNull(message = "Sub category is mandatory")
 	private Long subCategoryID;
+
+	@NotNull(message = "Category is mandatory")
+	private Long categoryID;
 }

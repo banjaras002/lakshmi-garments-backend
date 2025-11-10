@@ -140,6 +140,7 @@ public Page<InvoiceDTO> getInvoices(Integer pageNo, Integer pageSize, String sor
 			List<BaleDTO> baleDTOs = new ArrayList<>();
 			LorryReceiptDTO lorryReceiptDTO = modelMapper.map(lorryReceipt, LorryReceiptDTO.class);
 			for (Bale bale : lorryReceipt.getBales()) {
+				System.out.println(bale.getCategory());
 				BaleDTO baleDTO = modelMapper.map(bale, BaleDTO.class);
 				baleDTOs.add(baleDTO);
 			}

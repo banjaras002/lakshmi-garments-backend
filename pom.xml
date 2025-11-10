@@ -96,7 +96,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.8.1</version>  <!-- Ensure you're using a version that supports Java 21 -->
+                <!-- Ensure you're using a version that supports Java 21 -->
                 <configuration>
                     <source>17</source>  <!-- Use Java 21 -->
                     <target>17</target>  <!-- Use Java 21 -->
@@ -104,11 +104,18 @@
                         <path>
                             <groupId>org.projectlombok</groupId>
                             <artifactId>lombok</artifactId>
-                            <version>1.18.24</version> <!-- Make sure this matches the version of Lombok you use -->
+                            <version>1.18.34</version> <!-- Make sure this matches the version of Lombok you use -->
                         </path>
                     </annotationProcessorPaths>
                 </configuration>
             </plugin>
+            
+            <plugin>
+    <groupId>org.graalvm.buildtools</groupId>
+    <artifactId>native-maven-plugin</artifactId>
+    <version>0.10.2</version>
+</plugin>
+
 
             <!-- Spring Boot Maven Plugin -->
             <plugin>

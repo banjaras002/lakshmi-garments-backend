@@ -32,7 +32,7 @@ public interface InvoiceRepository extends JpaRepository<Invoice, Long>, JpaSpec
 		    JOIN lorry_receipts lr ON i.id = lr.invoice_id
 		    JOIN bales b ON b.lorry_receipt_id = lr.id
 		    JOIN sub_categories sc ON b.sub_category_id = sc.id
-		    JOIN categories c ON sc.category_id = c.id
+		    JOIN categories c ON b.category_id = c.id
 		    WHERE i.id = ?1
 		""", nativeQuery = true)
 		List<String> findDistinctCategories(Long invoiceId);

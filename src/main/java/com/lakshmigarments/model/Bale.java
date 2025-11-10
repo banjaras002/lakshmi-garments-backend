@@ -49,7 +49,7 @@ public class Bale {
 	private SubCategory subCategory;
 	
 	public Bale(String baleNumber, Long quantity, Double length, Double price, String quality,
-			 SubCategory subCategory, LorryReceipt lorryReceipt) {
+			 	SubCategory subCategory, Category category, LorryReceipt lorryReceipt) {
 		this.baleNumber = baleNumber;
 		this.quantity = quantity;
 		this.length = length;
@@ -57,6 +57,7 @@ public class Bale {
 		this.quality = quality;
 		this.lorryReceipt = lorryReceipt;
 		this.subCategory = subCategory;
+		this.category = category;
 	}
 	
 }

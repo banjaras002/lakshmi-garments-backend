@@ -126,13 +126,21 @@ public class StockService {
 				Double price = baleDTO.getPrice();
 				String quality = baleDTO.getQuality();
 				Long subCategoryID = baleDTO.getSubCategoryID();
-
+				Long categoryID = baleDTO.getCategoryID();
+				
 				SubCategory subCategory = subCategoryRepository.findById(subCategoryID).orElseThrow(() -> {
 					LOGGER.error("Sub Category with ID {} not found", subCategoryID);
 					return new SubCategoryNotFoundException("Sub Category not found with ID " + subCategoryID);
 				});
-				
-				Bale bale = new Bale(baleNumber, quantity, length, price, quality, subCategory, lorryReceipt);
+
+
+				Category category = categoryRepository.findById(categoryID).orElseThrow(() -> {
+					LOGGER.error("Category with ID {} not found", categoryID);
+					return new CategoryNotFoundException("Category not found with ID " + categoryID);
+				});
+
+				System.out.println(category);
+				Bale bale = new Bale(baleNumber, quantity, length, price, quality, subCategory, category, lorryReceipt);
 				bales.add(bale);
 			}
 			lrBaleMap.put(lorryReceipt, bales);
@@ -143,6 +151,7 @@ public class StockService {
 		for (Map.Entry<LorryReceipt, List<Bale>> entry : lrBaleMap.entrySet()) {
 		    LorryReceipt lorryReceipt = entry.getKey();
 		    List<Bale> bales = entry.getValue();
+		    System.out.println("bale" + bales);
 		    
 		    lorryReceipt.setInvoice(createdInvoice);
 		    LorryReceipt createdLorryReceipt = lorryReceiptRepository.save(lorryReceipt);
@@ -151,13 +160,14 @@ public class StockService {
 		        bale.setLorryReceipt(createdLorryReceipt);
 		        baleRepository.save(bale);
 		        // store in inventory
-		        Inventory inventory = inventoryRepository.findBySubCategoryName(bale.getSubCategory().getName()).orElse(null);
+		        Inventory inventory = inventoryRepository.findByCategoryIdAndSubCategoryId(bale.getCategory().getId(), bale.getSubCategory().getId()).orElse(null);
 		        if (inventory != null) {
 					inventory.setCount(inventory.getCount() + bale.getQuantity());
 				} else {
 					inventory = new Inventory();
 					inventory.setCount(bale.getQuantity());
 					inventory.setSubCategory(bale.getSubCategory());
+					inventory.setCategory(bale.getCategory());
 				}
 		        inventoryRepository.save(inventory);
 
