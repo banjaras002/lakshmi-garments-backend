@@ -5,16 +5,16 @@ INSERT INTO roles (name) VALUES ('Production Admin');
 INSERT INTO users (is_active, name, password, role_id) VALUES (true, 'admin', 'admin', 1);
 INSERT INTO users (is_active, name, password, role_id) VALUES (true, 'bala', 'bala', 1);
 
--- INSERT INTO transports (name) VALUES ('A1');
+INSERT INTO transports (name) VALUES ('A1');
 
--- INSERT INTO suppliers (location, name) VALUES ('annur', 'siva');
--- INSERT INTO suppliers (location, name) VALUES ('cbe', 'anoop');
+INSERT INTO suppliers (location, name) VALUES ('annur', 'siva');
+INSERT INTO suppliers (location, name) VALUES ('cbe', 'anoop');
 
--- INSERT INTO categories (code, name) VALUES ('D', 'dull');
--- INSERT INTO categories (code, name) VALUES ('P', 'Premium');
+INSERT INTO categories (code, name) VALUES ('D', 'dull');
+INSERT INTO categories (code, name) VALUES ('P', 'Premium');
 
--- INSERT INTO sub_categories (name, category_id) VALUES ('sleeve', 1);
--- INSERT INTO sub_categories (name, category_id) VALUES ('half-sleeve', 1);
+INSERT INTO sub_categories (name) VALUES ('sleeve');
+INSERT INTO sub_categories (name) VALUES ('half-sleeve');
 
 -- INSERT INTO batch_statuses (name) VALUES ('Created');
 -- INSERT INTO batch_statuses (name) VALUES ('Work In Progress');

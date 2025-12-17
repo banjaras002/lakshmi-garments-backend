@@ -11,14 +11,19 @@ import com.lakshmigarments.model.Jobwork;
 
 public interface JobworkRepository extends JpaRepository<Jobwork, Long>, JpaSpecificationExecutor<Jobwork> {
 
-    List<Jobwork> findAllByJobworkNumber(String jobworkNumber);
+	List<Jobwork> findAllByJobworkNumber(String jobworkNumber);
 
-    @Query("SELECT j FROM Jobwork j WHERE j.id IN (" +
-            "SELECT MIN(j2.id) FROM Jobwork j2 GROUP BY j2.jobworkNumber)")
-    List<Jobwork> findUniqueJobworksByJobworkNumber();
+	@Query("SELECT j FROM Jobwork j WHERE j.id IN (" + "SELECT MIN(j2.id) FROM Jobwork j2 GROUP BY j2.jobworkNumber)")
+	List<Jobwork> findUniqueJobworksByJobworkNumber();
 
-    Optional<Jobwork> findTop1ByOrderByJobworkNumberDesc();
+	Optional<Jobwork> findTop1ByOrderByJobworkNumberDesc();
 
-    List<Jobwork> findByBatchId(Long batchId);
+	List<Jobwork> findByBatchId(Long batchId);
+
+	@Query(value = "SELECT COUNT(*) FROM jobworks jw WHERE jw.employee_id = :employeeId AND jw.ended_at <> NULL", nativeQuery = true)
+	Long findActiveJobworkCount(Long employeeId);
+	
+	@Query(value = "SELECT COALESCE(SUM(quantity), 0) FROM jobworks jw WHERE jw.employee_id = :employeeId AND jw.ended_at IS NULL", nativeQuery = true)
+	Long findLifetimePiecesHandled(Long employeeId);
 
 }

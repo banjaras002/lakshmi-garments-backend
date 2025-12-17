@@ -28,15 +28,23 @@ public class Jobwork {
     @ManyToOne
     private Item item;
 
-    @ManyToOne
+    @Enumerated(EnumType.STRING)
+    @Column(name = "jobwork_type", nullable = false)
     private JobworkType jobworkType;
 
     private Long quantity;
 
     private String jobworkNumber;
+    
+    @Enumerated(EnumType.STRING)
+    @Column(name = "jobwork_origin", nullable = false)
+    private JobworkOrigin jobworkOrigin;
 
     @CreationTimestamp
     private LocalDateTime startedAt;
+    
+    @ManyToOne
+    private User assignedBy;
 
     @Column(nullable = true)
     private LocalDateTime endedAt;

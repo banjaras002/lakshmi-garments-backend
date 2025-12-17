@@ -45,10 +45,10 @@ public class JobworkController {
 
     @PostMapping
     public ResponseEntity<Void> createJobwork(@RequestBody JobworkRequestDTO jobworkRequestDTO) {
-        LOGGER.info("Received jobwork request for batch: {} and employee: {}", jobworkRequestDTO.getBatchId(),
+        LOGGER.info("Received jobwork request for batch: {} and employee: {}", jobworkRequestDTO.getBatchSerialCode(),
                 jobworkRequestDTO.getEmployeeId());
         jobworkService.createJobwork(jobworkRequestDTO);
-        LOGGER.info("Jobwork created successfully for batch: {} and employee: {}", jobworkRequestDTO.getBatchId(),
+        LOGGER.info("Jobwork created successfully for batch: {} and employee: {}", jobworkRequestDTO.getBatchSerialCode(),
                 jobworkRequestDTO.getEmployeeId());
         return new ResponseEntity<>(HttpStatus.CREATED);
     }

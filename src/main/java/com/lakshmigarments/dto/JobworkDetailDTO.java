@@ -3,6 +3,8 @@ package com.lakshmigarments.dto;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import com.lakshmigarments.model.JobworkType;
+
 import lombok.Getter;
 import lombok.Setter;
 
@@ -14,7 +16,7 @@ public class JobworkDetailDTO {
 
     private LocalDateTime startedAt;
 
-    private String jobworkType;
+    private JobworkType jobworkType;
 
     private String batchSerialCode;
 

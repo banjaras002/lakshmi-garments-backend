@@ -42,7 +42,7 @@ public class ModelMapperConfig {
 
 		modelMapper.typeMap(Batch.class, BatchResponseDTO.class).addMappings(mapper -> {
 			mapper.map(src -> src.getCategory().getName(), BatchResponseDTO::setCategoryName);
-			mapper.map(src -> src.getBatchStatus().getName(), BatchResponseDTO::setBatchStatus);
+//			mapper.map(src -> src.getBatchStatus().getName(), BatchResponseDTO::setBatchStatus);
 		});
 
 		modelMapper.typeMap(BatchSubCategory.class, BatchSubCategoryResponseDTO.class).addMappings(mapper -> {
@@ -57,7 +57,7 @@ public class ModelMapperConfig {
 		modelMapper.typeMap(Jobwork.class, JobworkResponseDTO.class).addMappings(mapper -> {
 			mapper.map(src -> src.getEmployee().getName(), JobworkResponseDTO::setEmployeeName);
 			mapper.map(src -> src.getBatch().getSerialCode(), JobworkResponseDTO::setBatchSerial);
-			mapper.map(src -> src.getJobworkType().getName(), JobworkResponseDTO::setJobworktype);
+//			mapper.map(src -> src.getJobworkType().getName(), JobworkResponseDTO::setJobworktype);
 			mapper.map(src -> src.getStartedAt(), JobworkResponseDTO::setStartedAt);
 			mapper.map(src -> src.getEndedAt() != null ? src.getEndedAt() : null, JobworkResponseDTO::setCompletedAt);
 			mapper.map(src -> src.getEndedAt() != null ? "Completed" : "In Progress", JobworkResponseDTO::setStatus);
@@ -65,7 +65,7 @@ public class ModelMapperConfig {
 
 		modelMapper.typeMap(Batch.class, BatchResponseDTO.class).addMappings(mapper -> {
 			mapper.map(src -> src.getCategory().getName(), BatchResponseDTO::setCategoryName);
-			mapper.map(src -> src.getBatchStatus().getName(), BatchResponseDTO::setBatchStatus);
+//			mapper.map(src -> src.getBatchStatus().getName(), BatchResponseDTO::setBatchStatus);
 		});
 
 		return modelMapper;

@@ -1,9 +1,11 @@
 package com.lakshmigarments.model;
 
 import java.sql.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.CreationTimestamp;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -26,7 +28,7 @@ public class Invoice {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 	
-	@Column(length = 100, nullable = false, unique = true)
+	@Column(length = 100, nullable = false)
 	private String invoiceNumber;
 	
 	private Date invoiceDate;
@@ -43,6 +45,9 @@ public class Invoice {
 	
 	@ManyToOne
 	private User createdBy;
+	
+	@CreationTimestamp
+	private LocalDateTime createdAt;
 	
 	@ColumnDefault("false")
 	private Boolean isPaid;

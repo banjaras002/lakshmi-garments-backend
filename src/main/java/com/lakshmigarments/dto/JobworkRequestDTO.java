@@ -1,5 +1,7 @@
 package com.lakshmigarments.dto;
 
+import com.lakshmigarments.model.JobworkType;
+
 import lombok.Getter;
 import lombok.Setter;
 
@@ -8,10 +10,11 @@ import lombok.Setter;
 public class JobworkRequestDTO {
 	
 	private Long employeeId;
-	private Long batchId;
+	private String batchSerialCode;
 	private Long itemId;
 	private Long quantity;
-	private Long jobworkTypeId;
+	private JobworkType jobworkType;
 	private String jobworkNumber;
+	private Long assignedBy;
 
 }

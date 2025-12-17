@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import com.lakshmigarments.dto.BatchRequestDTO;
 import com.lakshmigarments.dto.BatchSerialDTO;
 import com.lakshmigarments.dto.BatchTimelineDTO;
+import com.lakshmigarments.model.JobworkType;
 import com.lakshmigarments.dto.BatchResponseDTO;
 import com.lakshmigarments.service.BatchService;
 
@@ -65,12 +66,21 @@ public class BatchController {
 		return new ResponseEntity<>(batchCount, HttpStatus.OK);
 	}
 
+	// called to for getting the list of batches to assign
 	@GetMapping("/pending")
 	public ResponseEntity<List<BatchSerialDTO>> getPendingBatches() {
 		LOGGER.info("Received request to get pending batches");
 		List<BatchSerialDTO> batchSerialDTOs = batchService.getUnpackagedBatches();
 		LOGGER.info("Found {} pending batches", batchSerialDTOs.size());
 		return new ResponseEntity<>(batchSerialDTOs, HttpStatus.OK);
+	}
+	
+		// gets the possible workflows next for a batch
+	@GetMapping("/jobwork-types/{serialCode}")
+	public ResponseEntity<List<JobworkType>> getJobworkTypes(@PathVariable String serialCode) {
+		LOGGER.info("Received request to fetch the allowed transitions for the batch");
+		List<JobworkType> allowedJobworkTypes = batchService.getJobworkTypes(serialCode);
+		return new ResponseEntity<>(allowedJobworkTypes, HttpStatus.OK);
 	}
 
 	@GetMapping("/timeline/{batchId}")

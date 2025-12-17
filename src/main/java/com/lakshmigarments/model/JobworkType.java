@@ -1,27 +1,18 @@
 package com.lakshmigarments.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Column;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import java.util.Optional;
 
-@Entity
-@Table(name = "jobwork_types")
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-public class JobworkType {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    @Column(length = 100, nullable = false, unique = true)
-    private String name;
-
+public enum JobworkType {
+	CUTTING,
+	STITCHING,
+	PACKAGING;
+	
+	public static Optional<JobworkType> fromString(String value) {
+        if (value == null) return Optional.empty();
+        try {
+            return Optional.of(JobworkType.valueOf(value.toUpperCase()));
+        } catch (IllegalArgumentException e) {
+            return Optional.empty(); // invalid value
+        }
+    }
 }

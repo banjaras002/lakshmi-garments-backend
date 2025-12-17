@@ -21,12 +21,13 @@ public class Damage {
 
     private Integer quantity;
 
-    @ManyToOne
+    @Enumerated(EnumType.STRING)
+    @Column(name = "damage_type", nullable = false)
     private DamageType damageType;
 
     @ManyToOne
     private Jobwork reworkJobWork;
 
     @ManyToOne
-    private Jobwork reportedBy;
+    private Jobwork reportedFrom;
 }

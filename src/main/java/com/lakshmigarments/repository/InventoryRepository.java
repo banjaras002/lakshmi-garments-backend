@@ -17,10 +17,13 @@ import com.lakshmigarments.model.SubCategory;
 public interface InventoryRepository extends JpaRepository<Inventory, Long> {
 
     // ✅ Grouped count by Category and SubCategory names
-    @Query("SELECT i.category, i.subCategory.name, SUM(i.count) " +
-           "FROM Inventory i " +
-           "GROUP BY i.category.name, i.subCategory.name")
-    List<Object[]> getCategorySubCategoryCount();
+	@Query("SELECT i.category, i.subCategory.name, SUM(i.count), " +
+		       "(SUM(i.count) * 100.0 / " +
+		       " (SELECT SUM(i2.count) FROM Inventory i2 WHERE i2.category = i.category)) " +
+		       "FROM Inventory i " +
+		       "GROUP BY i.category, i.subCategory.name")
+		List<Object[]> getCategorySubCategoryCountWithPercentage();
+
 
     // ✅ Lookup by subCategory name and category name (both are directly available from Inventory)
     @Query("SELECT i FROM Inventory i WHERE i.subCategory.name = :subCategoryName AND i.category.name = :categoryName")

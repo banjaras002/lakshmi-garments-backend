@@ -30,7 +30,7 @@ public class InventoryController {
 		this.categoryService = categoryService;
 	}
 
-	@GetMapping("/categories/subcategory-counts")
+	@GetMapping
 	public List<CategorySubCategoryCountDTO> getCategoryCount() {
 		LOGGER.info("Received request to fetch category and subcategory counts.");
 		List<CategorySubCategoryCountDTO> result = inventoryService.getCategorySubCategoryCounts();

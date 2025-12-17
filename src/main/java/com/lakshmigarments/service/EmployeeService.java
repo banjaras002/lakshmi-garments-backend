@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 
 import com.lakshmigarments.dto.EmployeeRequestDTO;
 import com.lakshmigarments.dto.EmployeeResponseDTO;
+import com.lakshmigarments.dto.EmployeeStatsDTO;
 
 @Service
 public interface EmployeeService {
@@ -15,5 +16,7 @@ public interface EmployeeService {
 	EmployeeResponseDTO updateEmployee(Long id, EmployeeRequestDTO employeeRequestDTO);
 
 	List<EmployeeResponseDTO> getAllEmployees(String search);
+	
+	EmployeeStatsDTO getEmployeeStats(Long employeeId);
 
 }

@@ -8,6 +8,7 @@ import com.lakshmigarments.dto.BatchTimelineDTO;
 import com.lakshmigarments.dto.BatchRequestDTO;
 import com.lakshmigarments.dto.BatchResponseDTO;
 import com.lakshmigarments.dto.BatchUpdateDTO;
+import com.lakshmigarments.model.JobworkType;
 
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
@@ -28,5 +29,7 @@ public interface BatchService {
             List<String> categoryNames, List<Boolean> isUrgents, Date startDate, Date endDate);
 
     void updateBatch(Long batchId, BatchUpdateDTO batchUpdateDTO);
+    
+    List<JobworkType> getJobworkTypes(String batchSerialCode); 
     
 }

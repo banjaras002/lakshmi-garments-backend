@@ -27,7 +27,7 @@ public class CreateStockDTO {
 	
 	@PastOrPresent
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
-	private Date shipmentReceivedDate;
+	private Date receivedDate;
 	
 	@NotNull(message = "Supplier ID is mandatory")
 	@Positive(message = "Supplier ID should be positive")

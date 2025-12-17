@@ -20,17 +20,21 @@ public class BatchSpecification {
     }
 
     public static Specification<Batch> filterByBatchStatusName(List<String> batchStatusNames) {
-        return (root, query, criteriaBuilder) -> {
-            if (batchStatusNames != null && !batchStatusNames.isEmpty()) {
-                Join<Batch, BatchStatus> batchStatusJoin = root.join("batchStatus", JoinType.INNER);
-                Predicate[] predicates = batchStatusNames.stream()
-                        .map(batchStatusName -> criteriaBuilder.equal(batchStatusJoin.get("name"), batchStatusName))
-                        .toArray(Predicate[]::new);
-                return criteriaBuilder.or(predicates);
+
+        return (root, query, cb) -> {
+            if (batchStatusNames == null || batchStatusNames.isEmpty()) {
+                return cb.conjunction();
             }
-            return criteriaBuilder.conjunction();
+
+            List<BatchStatus> statuses = batchStatusNames.stream()
+                    .map(String::toUpperCase)
+                    .map(BatchStatus::valueOf)
+                    .toList();
+
+            return root.get("batchStatus").in(statuses);
         };
     }
+
 
     public static Specification<Batch> filterByCategoryName(List<String> categoryNames) {
         return (root, query, criteriaBuilder) -> {

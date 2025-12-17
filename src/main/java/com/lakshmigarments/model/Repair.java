@@ -4,10 +4,7 @@ import java.time.LocalDateTime;
 
 import org.hibernate.annotations.CreationTimestamp;
 
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -18,34 +15,25 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "batches")
+@Table(name = "repairs")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Batch {
-
+public class Repair {
+	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 	
-	@Column(length = 100, nullable = false, unique = true)
-	private String serialCode;
+	@ManyToOne
+	private Damage damage;
+	
+	private Long quantity;
+	
+	@ManyToOne
+	private Jobwork reworkJob;
 	
 	@CreationTimestamp
 	private LocalDateTime createdAt;
-	
-	@ManyToOne
-	private User createdBy;
-	
-	@ManyToOne
-	private Category category;
-	
-	private String remarks;
-	
-	private Boolean isUrgent;
-	
-	@Enumerated(EnumType.STRING)
-    @Column(name = "batch_status", nullable = false)
-    private BatchStatus batchStatus;
 
 }

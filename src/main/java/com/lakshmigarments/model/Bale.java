@@ -26,7 +26,7 @@ public class Bale {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 	
-	@Column(length = 100, nullable = false, unique = true)
+	@Column(length = 100, nullable = false)
 	private String baleNumber;
 	
 	private Long quantity;

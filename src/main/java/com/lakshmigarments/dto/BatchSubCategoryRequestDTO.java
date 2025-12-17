@@ -7,7 +7,7 @@ import lombok.Setter;
 @Setter
 public class BatchSubCategoryRequestDTO {
 	
-	private Long subCategoryID;
+	private String subCategoryName;
 	
 	private Long quantity;
 }

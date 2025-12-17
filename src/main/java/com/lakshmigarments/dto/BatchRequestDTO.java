@@ -2,6 +2,8 @@ package com.lakshmigarments.dto;
 
 import java.util.List;
 
+import com.lakshmigarments.model.BatchStatus;
+
 import lombok.Getter;
 import lombok.Setter;
 
@@ -9,15 +11,17 @@ import lombok.Setter;
 @Setter
 public class BatchRequestDTO {
 	
-	private Long categoryID;
+	private String categoryName;
 	
 	private String serialCode;
 		
-	private Long batchStatusID;
+	private BatchStatus batchStatus ;
 	
 	private Boolean isUrgent;
 	
 	private String remarks;
+	
+	private Long createdByID;
 	
 	private List<BatchSubCategoryRequestDTO> subCategories;
 }

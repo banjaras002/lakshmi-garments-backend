@@ -35,7 +35,7 @@ public class InventoryServiceImpl implements InventoryService {
     public List<CategorySubCategoryCountDTO> getCategorySubCategoryCounts() {
         LOGGER.info("Fetching category and subcategory counts from inventory.");
 
-        List<Object[]> result = inventoryRepository.getCategorySubCategoryCount();
+        List<Object[]> result = inventoryRepository.getCategorySubCategoryCountWithPercentage();
         LOGGER.debug("Raw query result size: {}", result.size());
 
         // Use category name+code as key to avoid entity issues
@@ -45,6 +45,7 @@ public class InventoryServiceImpl implements InventoryService {
             Category category = (Category) row[0];
             String subCategoryName = (String) row[1];
             Long totalCount = (Long) row[2];
+            Double percentage = (Double) row[3];
 
             String categoryKey = category.getName();
 
@@ -60,7 +61,8 @@ public class InventoryServiceImpl implements InventoryService {
 
             LOGGER.debug("Adding subcategory '{}' with count {} to category '{}'", subCategoryName, totalCount,
                     category.getName());
-            categoryDTO.getSubCategories().add(new SubCategoryCountDTO(subCategoryName, totalCount));
+            categoryDTO.getSubCategories().add(new SubCategoryCountDTO(subCategoryName, totalCount, 
+            		percentage));
         }
 
         List<CategorySubCategoryCountDTO> finalList = new ArrayList<>(categoryMap.values());

@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.lakshmigarments.dto.EmployeeRequestDTO;
 import com.lakshmigarments.dto.EmployeeResponseDTO;
+import com.lakshmigarments.dto.EmployeeStatsDTO;
 import com.lakshmigarments.service.EmployeeService;
 
 import jakarta.validation.Valid;
@@ -60,6 +61,13 @@ public class EmployeeController {
         EmployeeResponseDTO responseDTO = employeeService.updateEmployee(id, employeeRequestDTO);
         LOGGER.info("Employee updated successfully with ID: {}", id);
         return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
+    }
+    
+    @GetMapping("/stats/{id}")
+    public ResponseEntity<EmployeeStatsDTO> getEmployeeStats(@PathVariable Long id) {
+        LOGGER.info("Received request to get employee stats");
+        EmployeeStatsDTO statsDTO = employeeService.getEmployeeStats(id);
+        return ResponseEntity.status(HttpStatus.OK).body(statsDTO);
     }
 
 }

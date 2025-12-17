@@ -24,16 +24,18 @@ import com.lakshmigarments.model.Employee;
 import com.lakshmigarments.model.Item;
 import com.lakshmigarments.model.Jobwork;
 import com.lakshmigarments.model.JobworkType;
+import com.lakshmigarments.model.User;
 import com.lakshmigarments.exception.BatchNotFoundException;
 import com.lakshmigarments.exception.EmployeeNotFoundException;
 import com.lakshmigarments.exception.ItemNotFoundException;
 import com.lakshmigarments.exception.JobworkNotFoundException;
 import com.lakshmigarments.exception.JobworkTypeNotFoundException;
+import com.lakshmigarments.exception.UserNotFoundException;
 import com.lakshmigarments.repository.BatchRepository;
 import com.lakshmigarments.repository.EmployeeRepository;
 import com.lakshmigarments.repository.ItemRepository;
 import com.lakshmigarments.repository.JobworkRepository;
-import com.lakshmigarments.repository.JobworkTypeRepository;
+import com.lakshmigarments.repository.UserRepository;
 import com.lakshmigarments.service.JobworkService;
 import lombok.RequiredArgsConstructor;
 
@@ -45,9 +47,9 @@ public class JobworkServiceImpl implements JobworkService {
     private final JobworkRepository jobworkRepository;
     private final EmployeeRepository employeeRepository;
     private final ItemRepository itemRepository;
-    private final JobworkTypeRepository jobworkTypeRepository;
     private final ModelMapper modelMapper;
     private final BatchRepository batchRepository;
+    private final UserRepository userRepository;
 
     public Page<JobworkResponseDTO> getAllJobworks(Pageable pageable, String search) {
 
@@ -67,10 +69,15 @@ public class JobworkServiceImpl implements JobworkService {
             LOGGER.error("Employee with ID {} not found", jobworkRequestDTO.getEmployeeId());
             return new EmployeeNotFoundException("Employee not found with ID " + jobworkRequestDTO.getEmployeeId());
         });
+        
+        User user = userRepository.findById(jobworkRequestDTO.getAssignedBy()).orElseThrow(() -> {
+			LOGGER.error("User with ID {} not found", jobworkRequestDTO.getAssignedBy());
+			return new UserNotFoundException("User not found with ID " + jobworkRequestDTO.getAssignedBy());
+		});
 
-        Batch batch = batchRepository.findById(jobworkRequestDTO.getBatchId()).orElseThrow(() -> {
-            LOGGER.error("Batch with ID {} not found", jobworkRequestDTO.getBatchId());
-            return new BatchNotFoundException("Batch not found with ID " + jobworkRequestDTO.getBatchId());
+        Batch batch = batchRepository.findBySerialCode(jobworkRequestDTO.getBatchSerialCode()).orElseThrow(() -> {
+            LOGGER.error("Batch with serial code {} not found", jobworkRequestDTO.getBatchSerialCode());
+            return new BatchNotFoundException("Batch not found with serial code " + jobworkRequestDTO.getBatchSerialCode());
         });
 
         Item item = null;
@@ -81,20 +88,15 @@ public class JobworkServiceImpl implements JobworkService {
             });
         }
 
-        JobworkType jobworkType = jobworkTypeRepository.findById(jobworkRequestDTO.getJobworkTypeId())
-                .orElseThrow(() -> {
-                    LOGGER.error("Jobwork type with ID {} not found", jobworkRequestDTO.getJobworkTypeId());
-                    return new JobworkTypeNotFoundException(
-                            "Jobwork type not found with ID " + jobworkRequestDTO.getJobworkTypeId());
-                });
 
         Jobwork jobwork = new Jobwork();
         jobwork.setBatch(batch);
         jobwork.setQuantity(jobworkRequestDTO.getQuantity());
         jobwork.setItem(item);
         jobwork.setEmployee(employee);
-        jobwork.setJobworkType(jobworkType);
+        jobwork.setJobworkType(jobworkRequestDTO.getJobworkType());
         jobwork.setJobworkNumber(jobworkRequestDTO.getJobworkNumber());
+        jobwork.setAssignedBy(user);
         jobworkRepository.save(jobwork);
     }
 
@@ -159,7 +161,7 @@ public class JobworkServiceImpl implements JobworkService {
         JobworkDetailDTO jobworkDetailDTO = new JobworkDetailDTO();
         jobworkDetailDTO.setJobworkNumber(jobworks.get(0).getJobworkNumber());
         jobworkDetailDTO.setStartedAt(jobworks.get(0).getStartedAt());
-        jobworkDetailDTO.setJobworkType(jobworks.get(0).getJobworkType().getName());
+        jobworkDetailDTO.setJobworkType(jobworks.get(0).getJobworkType());
         jobworkDetailDTO.setBatchSerialCode(jobworks.get(0).getBatch().getSerialCode());
         jobworkDetailDTO.setAssignedTo(jobworks.get(0).getEmployee().getName());
         jobworkDetailDTO.setItems(items);
@@ -190,7 +192,7 @@ public class JobworkServiceImpl implements JobworkService {
 
             // Safe null checks
             if (first.getJobworkType() != null) {
-                dto.setJobworktype(first.getJobworkType().getName());
+                dto.setJobworktype(first.getJobworkType());
             }
 
             if (first.getBatch() != null) {

@@ -26,26 +26,28 @@ import com.lakshmigarments.dto.BatchTimelineDTO;
 import com.lakshmigarments.dto.BatchResponseDTO.BatchSubCategoryResponseDTO;
 import com.lakshmigarments.model.Batch;
 import com.lakshmigarments.model.BatchStatus;
-import com.lakshmigarments.model.BatchStatusEnum;
 import com.lakshmigarments.model.BatchSubCategory;
 import com.lakshmigarments.model.Category;
 import com.lakshmigarments.model.Damage;
 import com.lakshmigarments.model.Inventory;
 import com.lakshmigarments.model.Jobwork;
+import com.lakshmigarments.model.JobworkType;
 import com.lakshmigarments.model.SubCategory;
+import com.lakshmigarments.model.User;
 import com.lakshmigarments.exception.BatchNotFoundException;
 import com.lakshmigarments.exception.BatchStatusNotFoundException;
 import com.lakshmigarments.exception.CategoryNotFoundException;
 import com.lakshmigarments.exception.InsufficientInventoryException;
 import com.lakshmigarments.exception.SubCategoryNotFoundException;
+import com.lakshmigarments.exception.UserNotFoundException;
 import com.lakshmigarments.repository.BatchRepository;
-import com.lakshmigarments.repository.BatchStatusRepository;
 import com.lakshmigarments.repository.CategoryRepository;
 import com.lakshmigarments.repository.BatchSubCategoryRepository;
 import com.lakshmigarments.repository.DamageRepository;
 import com.lakshmigarments.repository.InventoryRepository;
 import com.lakshmigarments.repository.JobworkRepository;
 import com.lakshmigarments.repository.SubCategoryRepository;
+import com.lakshmigarments.repository.UserRepository;
 import com.lakshmigarments.repository.specification.BatchSpecification;
 import com.lakshmigarments.service.BatchService;
 import com.lakshmigarments.service.EmployeeService;
@@ -64,9 +66,9 @@ public class BatchServiceImpl implements BatchService {
     private final BatchSubCategoryRepository batchSubCategoryRepository;
     private final DamageRepository damageRepository;
     private final CategoryRepository categoryRepository;
-    private final BatchStatusRepository batchStatusRepository;
     private final SubCategoryRepository subCategoryRepository;
     private final InventoryRepository inventoryRepository;
+    private final UserRepository userRepository;
     private final ModelMapper modelMapper;
 
     // BatchServiceImpl(EmployeeService employeeService) {
@@ -77,22 +79,21 @@ public class BatchServiceImpl implements BatchService {
     @Transactional
     public void createBatch(BatchRequestDTO batchRequestDTO) {
 
-        Category category = categoryRepository.findById(batchRequestDTO.getCategoryID())
+        Category category = categoryRepository.findByName(batchRequestDTO.getCategoryName())
                 .orElseThrow(() -> {
-                    LOGGER.error("Category not found with id {}", batchRequestDTO.getCategoryID());
+                    LOGGER.error("Category not found with name {}", batchRequestDTO.getCategoryName());
                     return new CategoryNotFoundException(
-                            "Category not found with id " + batchRequestDTO.getCategoryID());
+                            "Category not found with name " + batchRequestDTO.getCategoryName());
                 });
+        
+        User user = userRepository.findById(batchRequestDTO.getCreatedByID()).orElseThrow(() -> {
+			LOGGER.error("User with ID {} not found", batchRequestDTO.getCreatedByID());
+			return new UserNotFoundException("User not found with ID " + batchRequestDTO.getCreatedByID());
+		});
 
-        BatchStatus batchStatus = batchStatusRepository.findByName(BatchStatusEnum.CREATED.getValue()).orElse(null);
-        if (batchRequestDTO.getBatchStatusID() != null) {
-            batchStatus = batchStatusRepository.findById(batchRequestDTO.getBatchStatusID())
-                    .orElseThrow(() -> {
-                        LOGGER.error("Batch status not found with id {}", batchRequestDTO.getBatchStatusID());
-                        return new BatchStatusNotFoundException(
-                                "Batch status not found with id " + batchRequestDTO.getBatchStatusID());
-                    });
-        }
+        BatchStatus batchStatus = batchRequestDTO.getBatchStatus() != null
+                ? batchRequestDTO.getBatchStatus() : BatchStatus.CREATED;
+
 
         List<BatchSubCategory> batchSubCategories = validateBatchSubCategories(batchRequestDTO.getSubCategories());
 
@@ -102,6 +103,7 @@ public class BatchServiceImpl implements BatchService {
         batch.setSerialCode(batchRequestDTO.getSerialCode());
         batch.setIsUrgent(batchRequestDTO.getIsUrgent());
         batch.setRemarks(batchRequestDTO.getRemarks());
+        batch.setCreatedBy(user);
 
         batchRepository.save(batch);
 
@@ -129,6 +131,8 @@ public class BatchServiceImpl implements BatchService {
     public Page<BatchResponseDTO> getAllBatches(Integer pageNo, Integer pageSize, String sortBy,
             String sortOrder, String search, List<String> batchStatusNames, List<String> categoryNames,
             List<Boolean> isUrgents, Date startDate, Date endDate) {
+    	
+    	System.out.println("dog" + batchStatusNames.get(0));
 
         if (pageNo == null) {
             pageNo = 0;
@@ -165,7 +169,7 @@ public class BatchServiceImpl implements BatchService {
     @Override
     public List<BatchSerialDTO> getUnpackagedBatches() {
         LOGGER.info("Fetching unpackaged batches");
-        List<Batch> unpackagedBatches = batchRepository.findUnpackagedBatches();
+        List<Batch> unpackagedBatches = batchRepository.findAllExceptPackagedWithoutRepairableDamages();
         List<BatchSerialDTO> batchSerialDTOs = unpackagedBatches.stream()
                 .map(batch -> modelMapper.map(batch, BatchSerialDTO.class))
                 .collect(Collectors.toList());
@@ -187,8 +191,8 @@ public class BatchServiceImpl implements BatchService {
         for (Jobwork jobwork : jobworks) {
             BatchTimelineDTO batchTimelineDTO = new BatchTimelineDTO();
             batchTimelineDTO.setDateTime(jobwork.getStartedAt());
-            batchTimelineDTO.setJobworkType(jobwork.getJobworkType().getName());
-            if (jobwork.getJobworkType().getName().equals("Cutting")) {
+            batchTimelineDTO.setJobworkType(jobwork.getJobworkType());
+            if (jobwork.getJobworkType() == JobworkType.CUTTING) {
                 String description = "Assigned " + jobwork.getQuantity() + " pieces to "
                         + jobwork.getEmployee().getName();
                 batchTimelineDTO.setDescription(description);
@@ -203,9 +207,9 @@ public class BatchServiceImpl implements BatchService {
             if (jobwork.getEndedAt() != null) {
                 BatchTimelineDTO batchTimelineDTOForEnd = new BatchTimelineDTO();
                 batchTimelineDTO.setDateTime(jobwork.getEndedAt());
-                batchTimelineDTO.setJobworkType(jobwork.getJobworkType().getName());
+                batchTimelineDTO.setJobworkType(jobwork.getJobworkType());
                 String description = "";
-                if (jobwork.getJobworkType().getName().equals("Cutting")) {
+                if (jobwork.getJobworkType() == JobworkType.CUTTING) {
                     description = "Completed cutting " + jobwork.getQuantity() + " pieces by "
                             + jobwork.getEmployee().getName();
                 } else {
@@ -235,12 +239,12 @@ public class BatchServiceImpl implements BatchService {
     private List<BatchSubCategory> validateBatchSubCategories(List<BatchSubCategoryRequestDTO> batchSubCategories) {
         List<BatchSubCategory> validatedBatchSubCategories = new ArrayList<>();
         for (BatchSubCategoryRequestDTO batchSubCategoryRequestDTO : batchSubCategories) {
-            SubCategory subCategory = subCategoryRepository.findById(batchSubCategoryRequestDTO.getSubCategoryID())
+            SubCategory subCategory = subCategoryRepository.findByName(batchSubCategoryRequestDTO.getSubCategoryName())
                     .orElseThrow(() -> {
                         LOGGER.error("Sub category not found with id {}",
-                                batchSubCategoryRequestDTO.getSubCategoryID());
+                                batchSubCategoryRequestDTO.getSubCategoryName());
                         return new SubCategoryNotFoundException(
-                                "Sub category not found with id " + batchSubCategoryRequestDTO.getSubCategoryID());
+                                "Sub category not found with name " + batchSubCategoryRequestDTO.getSubCategoryName());
                     });
             BatchSubCategory batchSubCategory = new BatchSubCategory();
             batchSubCategory.setSubCategory(subCategory);
@@ -296,16 +300,38 @@ public class BatchServiceImpl implements BatchService {
             }
         }
         if (batchUpdateDTO.getBatchStatusName() != null) {
-            BatchStatus batchStatus = batchStatusRepository.findByName(batchUpdateDTO.getBatchStatusName())
-                    .orElseThrow(() -> {
-                        LOGGER.error("Batch status not found with name {}", batchUpdateDTO.getBatchStatusName());
-                        return new BatchStatusNotFoundException(
-                                "Batch status not found with name " + batchUpdateDTO.getBatchStatusName());
-                    });
-            if (batchStatus.getName().equals(BatchStatusEnum.DISCARDED.getValue())) {
-            batch.setBatchStatus(batchStatus);
+            try {
+                BatchStatus batchStatus =
+                        BatchStatus.valueOf(batchUpdateDTO.getBatchStatusName().toUpperCase());
+
+                if (batchStatus == BatchStatus.DISCARDED) {
+                    batch.setBatchStatus(batchStatus);
+                }
+
+            } catch (IllegalArgumentException ex) {
+                LOGGER.error("Invalid batch status {}", batchUpdateDTO.getBatchStatusName());
+                throw new BatchStatusNotFoundException(
+                        "Batch status not found with name " + batchUpdateDTO.getBatchStatusName());
+            }
         }
+
         batchRepository.save(batch);
     }
-    }
+
+    // TODO
+	@Override
+	public List<JobworkType> getJobworkTypes(String batchSerialCode) {
+		List<JobworkType> result = new ArrayList<>(); 
+		Batch batch = batchRepository.findBySerialCode(batchSerialCode)
+             .orElseThrow(() -> {
+            	 LOGGER.error("Batch not found with serial code {}", batchSerialCode);
+                 return new BatchNotFoundException("Batch not found with serial code " + batchSerialCode);
+         });
+		
+//		Long totalQuantity = batchRepository.findQuantityBySerialCode(batchSerialCode);
+		//cutting
+		
+		result.add(JobworkType.CUTTING);
+		return result;
+	}
 }

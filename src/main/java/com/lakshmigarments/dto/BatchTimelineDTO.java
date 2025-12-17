@@ -2,6 +2,8 @@ package com.lakshmigarments.dto;
 
 import java.time.LocalDateTime;
 
+import com.lakshmigarments.model.JobworkType;
+
 import lombok.Getter;
 import lombok.Setter;
 
@@ -11,7 +13,7 @@ public class BatchTimelineDTO {
 
     private LocalDateTime dateTime;
 
-    private String jobworkType;
+    private JobworkType jobworkType;
 
     private String description;
 

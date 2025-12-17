@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import com.lakshmigarments.dto.EmployeeRequestDTO;
 import com.lakshmigarments.dto.EmployeeResponseDTO;
+import com.lakshmigarments.dto.EmployeeStatsDTO;
 import com.lakshmigarments.dto.SkillResponseDTO;
 import com.lakshmigarments.exception.DuplicateEmployeeException;
 import com.lakshmigarments.exception.EmployeeNotFoundException;
@@ -21,6 +22,7 @@ import com.lakshmigarments.model.EmployeeSkill;
 import com.lakshmigarments.model.Skill;
 import com.lakshmigarments.repository.EmployeeRepository;
 import com.lakshmigarments.repository.EmployeeSkillRepository;
+import com.lakshmigarments.repository.JobworkRepository;
 import com.lakshmigarments.repository.SkillRepository;
 import com.lakshmigarments.repository.specification.EmployeeSpecification;
 import com.lakshmigarments.service.EmployeeService;
@@ -39,6 +41,7 @@ public class EmployeeServiceImpl implements EmployeeService {
 	private final SkillRepository skillRepository;
 
 	private final EmployeeSkillRepository employeeSkillRepository;
+	private final JobworkRepository jobworkRepository;
 
 	private final ModelMapper modelMapper;
 
@@ -72,8 +75,7 @@ public class EmployeeServiceImpl implements EmployeeService {
 		EmployeeResponseDTO responseDTO = modelMapper.map(savedEmployee, EmployeeResponseDTO.class);
 
 		List<SkillResponseDTO> skillResponseDTOs = skills.stream()
-				.map(skill -> modelMapper.map(skill, SkillResponseDTO.class))
-				.collect(Collectors.toList());
+				.map(skill -> modelMapper.map(skill, SkillResponseDTO.class)).collect(Collectors.toList());
 
 		responseDTO.setSkills(skillResponseDTOs);
 		return responseDTO;
@@ -85,11 +87,10 @@ public class EmployeeServiceImpl implements EmployeeService {
 	public EmployeeResponseDTO updateEmployee(Long id, EmployeeRequestDTO employeeRequestDTO) {
 		LOGGER.info("Updating employee with ID: {}", id);
 
-		Employee employee = employeeRepository.findById(id)
-				.orElseThrow(() -> {
-					LOGGER.error("Employee not found with ID: {}", id);
-					return new EmployeeNotFoundException("Employee not found with ID " + id);
-				});
+		Employee employee = employeeRepository.findById(id).orElseThrow(() -> {
+			LOGGER.error("Employee not found with ID: {}", id);
+			return new EmployeeNotFoundException("Employee not found with ID " + id);
+		});
 
 		String employeeName = employeeRequestDTO.getName().trim().toLowerCase();
 
@@ -132,17 +133,15 @@ public class EmployeeServiceImpl implements EmployeeService {
 		Specification<Employee> specification = EmployeeSpecification.filterByName(search);
 		List<Employee> employees = employeeRepository.findAll(specification);
 
-		List<EmployeeResponseDTO> employeeResponseDTOs = employees.stream()
-				.map(employee -> {
-					EmployeeResponseDTO dto = modelMapper.map(employee, EmployeeResponseDTO.class);
-					List<EmployeeSkill> employeeSkills = employeeSkillRepository.findByEmployee(employee);
-					List<SkillResponseDTO> skillResponseDTOs = employeeSkills.stream()
-							.map(employeeSkill -> modelMapper.map(employeeSkill.getSkill(), SkillResponseDTO.class))
-							.collect(Collectors.toList());
-					dto.setSkills(skillResponseDTOs);
-					return dto;
-				})
-				.collect(Collectors.toList());
+		List<EmployeeResponseDTO> employeeResponseDTOs = employees.stream().map(employee -> {
+			EmployeeResponseDTO dto = modelMapper.map(employee, EmployeeResponseDTO.class);
+			List<EmployeeSkill> employeeSkills = employeeSkillRepository.findByEmployee(employee);
+			List<SkillResponseDTO> skillResponseDTOs = employeeSkills.stream()
+					.map(employeeSkill -> modelMapper.map(employeeSkill.getSkill(), SkillResponseDTO.class))
+					.collect(Collectors.toList());
+			dto.setSkills(skillResponseDTOs);
+			return dto;
+		}).collect(Collectors.toList());
 
 		return employeeResponseDTOs;
 	}
@@ -162,6 +161,25 @@ public class EmployeeServiceImpl implements EmployeeService {
 			skills.add(skill);
 		}
 		return skills;
+	}
+
+	@Override
+	public EmployeeStatsDTO getEmployeeStats(Long employeeId) {
+		
+		EmployeeStatsDTO employeeStatsDTO = new EmployeeStatsDTO();
+		Employee employee = employeeRepository.findById(employeeId).orElseThrow(() -> {
+			LOGGER.error("Employee not found with ID: {}", employeeId);
+			return new EmployeeNotFoundException("Employee not found with ID " + employeeId);
+		});
+		
+		long activeJobs = jobworkRepository.findActiveJobworkCount(employeeId);
+		long lifetimePieces = jobworkRepository.findLifetimePiecesHandled(employeeId);
+		
+		employeeStatsDTO.setEmployeeName(employee.getName());
+		employeeStatsDTO.setHasOtherJobs(activeJobs == 0 ? true : false);
+		employeeStatsDTO.setLifetimePieces(lifetimePieces);
+		
+		return employeeStatsDTO;
 	}
 
 }
