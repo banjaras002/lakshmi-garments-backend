@@ -42,7 +42,7 @@ public class ModelMapperConfig {
 
 		modelMapper.typeMap(Batch.class, BatchResponseDTO.class).addMappings(mapper -> {
 			mapper.map(src -> src.getCategory().getName(), BatchResponseDTO::setCategoryName);
-//			mapper.map(src -> src.getBatchStatus().getName(), BatchResponseDTO::setBatchStatus);
+			mapper.map(src -> src.getCreatedBy().getName(), BatchResponseDTO::setCreatedBy);
 		});
 
 		modelMapper.typeMap(BatchSubCategory.class, BatchSubCategoryResponseDTO.class).addMappings(mapper -> {

@@ -91,4 +91,11 @@ public class BatchController {
 				batchTimelineDTOs == null ? 0 : batchTimelineDTOs.size(), batchId);
 		return new ResponseEntity<>(batchTimelineDTOs, HttpStatus.OK);
 	}
+	
+	@PostMapping("/recycle/{batchId}")
+	public ResponseEntity<Void> recycleBatch(@PathVariable Long batchId) {
+		LOGGER.info("Received request to recycle for batch id: {}", batchId);
+		batchService.recycleBatch(batchId);
+		return new ResponseEntity<>(HttpStatus.OK);
+	}
 }

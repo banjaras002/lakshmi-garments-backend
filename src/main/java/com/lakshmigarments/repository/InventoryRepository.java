@@ -46,4 +46,7 @@ public interface InventoryRepository extends JpaRepository<Inventory, Long> {
     // ✅ Lookup by category ID and return all subcategories
     @Query("SELECT DISTINCT i.subCategory FROM Inventory i WHERE i.category.id = :categoryId")
     List<SubCategory> findSubCategoriesByCategoryId(@Param("categoryId") Long categoryId);
+    
+    boolean existsByCategoryIdAndSubCategoryId(Long categoryId, Long subCategoryId);
+    
 }

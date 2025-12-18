@@ -30,6 +30,8 @@ public interface BatchService {
 
     void updateBatch(Long batchId, BatchUpdateDTO batchUpdateDTO);
     
-    List<JobworkType> getJobworkTypes(String batchSerialCode); 
+    List<JobworkType> getJobworkTypes(String batchSerialCode);
+    
+    void recycleBatch(Long batchId);
     
 }

@@ -61,11 +61,16 @@ public class InventoryServiceImpl implements InventoryService {
 
             LOGGER.debug("Adding subcategory '{}' with count {} to category '{}'", subCategoryName, totalCount,
                     category.getName());
-            categoryDTO.getSubCategories().add(new SubCategoryCountDTO(subCategoryName, totalCount, 
-            		percentage));
+            if (totalCount != 0) {
+                categoryDTO.getSubCategories().add(new SubCategoryCountDTO(subCategoryName, totalCount, 
+                		percentage));
+			}
         }
 
-        List<CategorySubCategoryCountDTO> finalList = new ArrayList<>(categoryMap.values());
+        List<CategorySubCategoryCountDTO> finalList = categoryMap.values().stream()
+                .filter(dto -> !dto.getSubCategories().isEmpty())
+                .collect(Collectors.toList());
+
         LOGGER.info("Returning {} category DTOs", finalList.size());
         return finalList;
     }

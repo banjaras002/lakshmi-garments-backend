@@ -38,6 +38,8 @@ public class BatchResponseDTO {
 	
 	private LocalDateTime createdAt;
 	
+	private String createdBy;
+	
 	private List<BatchSubCategoryResponseDTO> subCategories;
 
 }
