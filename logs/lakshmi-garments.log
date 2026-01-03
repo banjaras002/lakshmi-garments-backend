@@ -7538,3 +7538,155 @@ Caused by: java.sql.SQLSyntaxErrorException: Key column 'category_id' doesn't ex
 2026-01-03 18:24:05 INFO  [restartedMain] o.s.b.w.e.tomcat.TomcatWebServer - Tomcat started on port 8080 (http) with context path '/'
 2026-01-03 18:24:05 INFO  [restartedMain] c.l.LakshmiGarmentsApplication - Started LakshmiGarmentsApplication in 0.713 seconds (process running for 61278.711)
 2026-01-03 18:24:05 INFO  [restartedMain] o.s.b.d.a.ConditionEvaluationDeltaLoggingListener - Condition evaluation unchanged
+2026-01-03 18:28:46 INFO  [File Watcher] o.s.b.d.a.LocalDevToolsAutoConfiguration$RestartingClassPathChangeChangedEventListener - Restarting due to 1 class path change (0 additions, 0 deletions, 1 modification)
+2026-01-03 18:28:46 INFO  [Thread-175] o.s.b.w.e.tomcat.GracefulShutdown - Commencing graceful shutdown. Waiting for active requests to complete
+2026-01-03 18:28:46 INFO  [tomcat-shutdown] o.s.b.w.e.tomcat.GracefulShutdown - Graceful shutdown complete
+2026-01-03 18:28:46 INFO  [Thread-175] o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-01-03 18:28:46 INFO  [Thread-175] com.zaxxer.hikari.HikariDataSource - HikariPool-44 - Shutdown initiated...
+2026-01-03 18:28:46 INFO  [Thread-175] com.zaxxer.hikari.HikariDataSource - HikariPool-44 - Shutdown completed.
+2026-01-03 18:28:46 INFO  [restartedMain] c.l.LakshmiGarmentsApplication - Starting LakshmiGarmentsApplication using Java 17.0.17 with PID 46300 (C:\Users\KEX1COB\Desktop\PERSONAL\LG\lakshmi-garments-backend\target\classes started by KEX1COB in C:\Users\KEX1COB\Desktop\PERSONAL\LG\lakshmi-garments-backend)
+2026-01-03 18:28:46 INFO  [restartedMain] c.l.LakshmiGarmentsApplication - No active profile set, falling back to 1 default profile: "default"
+2026-01-03 18:28:47 INFO  [restartedMain] o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-01-03 18:28:47 INFO  [restartedMain] o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 26 ms. Found 23 JPA repository interfaces.
+2026-01-03 18:28:47 INFO  [restartedMain] o.s.b.w.e.tomcat.TomcatWebServer - Tomcat initialized with port 8080 (http)
+2026-01-03 18:28:47 INFO  [restartedMain] o.a.catalina.core.StandardService - Starting service [Tomcat]
+2026-01-03 18:28:47 INFO  [restartedMain] o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.34]
+2026-01-03 18:28:47 INFO  [restartedMain] o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2026-01-03 18:28:47 INFO  [restartedMain] o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 179 ms
+2026-01-03 18:28:47 INFO  [restartedMain] o.h.jpa.internal.util.LogHelper - HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-01-03 18:28:47 INFO  [restartedMain] o.h.c.i.RegionFactoryInitiator - HHH000026: Second-level cache disabled
+2026-01-03 18:28:47 INFO  [restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-01-03 18:28:47 INFO  [restartedMain] com.zaxxer.hikari.HikariDataSource - HikariPool-45 - Starting...
+2026-01-03 18:28:47 INFO  [restartedMain] com.zaxxer.hikari.pool.HikariPool - HikariPool-45 - Added connection com.mysql.cj.jdbc.ConnectionImpl@5df49ca7
+2026-01-03 18:28:47 INFO  [restartedMain] com.zaxxer.hikari.HikariDataSource - HikariPool-45 - Start completed.
+2026-01-03 18:28:47 WARN  [restartedMain] org.hibernate.orm.deprecation - HHH90000025: MySQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-01-03 18:28:47 INFO  [restartedMain] o.hibernate.orm.connections.pooling - HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-45)']
+	Database driver: undefined/unknown
+	Database version: 8.0.43
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-01-03 18:28:47 INFO  [restartedMain] o.h.e.t.j.p.i.JtaPlatformInitiator - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-01-03 18:28:47 INFO  [restartedMain] o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-01-03 18:28:47 WARN  [restartedMain] o.s.b.a.o.j.JpaBaseConfiguration$JpaWebConfiguration - spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-01-03 18:28:47 INFO  [restartedMain] o.s.b.a.w.s.WelcomePageHandlerMapping - Adding welcome page: class path resource [static/index.html]
+2026-01-03 18:28:47 INFO  [restartedMain] o.s.b.d.a.OptionalLiveReloadServer - LiveReload server is running on port 35729
+2026-01-03 18:28:47 INFO  [restartedMain] o.s.b.w.e.tomcat.TomcatWebServer - Tomcat started on port 8080 (http) with context path '/'
+2026-01-03 18:28:47 INFO  [restartedMain] c.l.LakshmiGarmentsApplication - Started LakshmiGarmentsApplication in 0.691 seconds (process running for 61560.61)
+2026-01-03 18:28:47 INFO  [restartedMain] o.s.b.d.a.ConditionEvaluationDeltaLoggingListener - Condition evaluation unchanged
+2026-01-03 18:28:54 INFO  [File Watcher] o.s.b.d.a.LocalDevToolsAutoConfiguration$RestartingClassPathChangeChangedEventListener - Restarting due to 1 class path change (0 additions, 0 deletions, 1 modification)
+2026-01-03 18:28:54 INFO  [Thread-179] o.s.b.w.e.tomcat.GracefulShutdown - Commencing graceful shutdown. Waiting for active requests to complete
+2026-01-03 18:28:54 INFO  [tomcat-shutdown] o.s.b.w.e.tomcat.GracefulShutdown - Graceful shutdown complete
+2026-01-03 18:28:54 INFO  [Thread-179] o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-01-03 18:28:54 INFO  [Thread-179] com.zaxxer.hikari.HikariDataSource - HikariPool-45 - Shutdown initiated...
+2026-01-03 18:28:54 INFO  [Thread-179] com.zaxxer.hikari.HikariDataSource - HikariPool-45 - Shutdown completed.
+2026-01-03 18:28:54 INFO  [restartedMain] c.l.LakshmiGarmentsApplication - Starting LakshmiGarmentsApplication using Java 17.0.17 with PID 46300 (C:\Users\KEX1COB\Desktop\PERSONAL\LG\lakshmi-garments-backend\target\classes started by KEX1COB in C:\Users\KEX1COB\Desktop\PERSONAL\LG\lakshmi-garments-backend)
+2026-01-03 18:28:54 INFO  [restartedMain] c.l.LakshmiGarmentsApplication - No active profile set, falling back to 1 default profile: "default"
+2026-01-03 18:28:54 INFO  [restartedMain] o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-01-03 18:28:54 INFO  [restartedMain] o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 25 ms. Found 23 JPA repository interfaces.
+2026-01-03 18:28:54 INFO  [restartedMain] o.s.b.w.e.tomcat.TomcatWebServer - Tomcat initialized with port 8080 (http)
+2026-01-03 18:28:54 INFO  [restartedMain] o.a.catalina.core.StandardService - Starting service [Tomcat]
+2026-01-03 18:28:54 INFO  [restartedMain] o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.34]
+2026-01-03 18:28:54 INFO  [restartedMain] o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2026-01-03 18:28:54 INFO  [restartedMain] o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 159 ms
+2026-01-03 18:28:54 INFO  [restartedMain] o.h.jpa.internal.util.LogHelper - HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-01-03 18:28:54 INFO  [restartedMain] o.h.c.i.RegionFactoryInitiator - HHH000026: Second-level cache disabled
+2026-01-03 18:28:54 INFO  [restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-01-03 18:28:54 INFO  [restartedMain] com.zaxxer.hikari.HikariDataSource - HikariPool-46 - Starting...
+2026-01-03 18:28:54 INFO  [restartedMain] com.zaxxer.hikari.pool.HikariPool - HikariPool-46 - Added connection com.mysql.cj.jdbc.ConnectionImpl@3ef46203
+2026-01-03 18:28:54 INFO  [restartedMain] com.zaxxer.hikari.HikariDataSource - HikariPool-46 - Start completed.
+2026-01-03 18:28:54 WARN  [restartedMain] org.hibernate.orm.deprecation - HHH90000025: MySQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-01-03 18:28:54 INFO  [restartedMain] o.hibernate.orm.connections.pooling - HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-46)']
+	Database driver: undefined/unknown
+	Database version: 8.0.43
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-01-03 18:28:54 INFO  [restartedMain] o.h.e.t.j.p.i.JtaPlatformInitiator - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-01-03 18:28:54 INFO  [restartedMain] o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-01-03 18:28:55 WARN  [restartedMain] o.s.b.a.o.j.JpaBaseConfiguration$JpaWebConfiguration - spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-01-03 18:28:55 INFO  [restartedMain] o.s.b.a.w.s.WelcomePageHandlerMapping - Adding welcome page: class path resource [static/index.html]
+2026-01-03 18:28:55 INFO  [restartedMain] o.s.b.d.a.OptionalLiveReloadServer - LiveReload server is running on port 35729
+2026-01-03 18:28:55 INFO  [restartedMain] o.s.b.w.e.tomcat.TomcatWebServer - Tomcat started on port 8080 (http) with context path '/'
+2026-01-03 18:28:55 INFO  [restartedMain] c.l.LakshmiGarmentsApplication - Started LakshmiGarmentsApplication in 0.653 seconds (process running for 61568.182)
+2026-01-03 18:28:55 INFO  [restartedMain] o.s.b.d.a.ConditionEvaluationDeltaLoggingListener - Condition evaluation unchanged
+2026-01-03 18:29:00 INFO  [File Watcher] o.s.b.d.a.LocalDevToolsAutoConfiguration$RestartingClassPathChangeChangedEventListener - Restarting due to 1 class path change (0 additions, 0 deletions, 1 modification)
+2026-01-03 18:29:00 INFO  [Thread-183] o.s.b.w.e.tomcat.GracefulShutdown - Commencing graceful shutdown. Waiting for active requests to complete
+2026-01-03 18:29:01 INFO  [tomcat-shutdown] o.s.b.w.e.tomcat.GracefulShutdown - Graceful shutdown complete
+2026-01-03 18:29:01 INFO  [Thread-183] o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-01-03 18:29:01 INFO  [Thread-183] com.zaxxer.hikari.HikariDataSource - HikariPool-46 - Shutdown initiated...
+2026-01-03 18:29:01 INFO  [Thread-183] com.zaxxer.hikari.HikariDataSource - HikariPool-46 - Shutdown completed.
+2026-01-03 18:29:01 INFO  [restartedMain] c.l.LakshmiGarmentsApplication - Starting LakshmiGarmentsApplication using Java 17.0.17 with PID 46300 (C:\Users\KEX1COB\Desktop\PERSONAL\LG\lakshmi-garments-backend\target\classes started by KEX1COB in C:\Users\KEX1COB\Desktop\PERSONAL\LG\lakshmi-garments-backend)
+2026-01-03 18:29:01 INFO  [restartedMain] c.l.LakshmiGarmentsApplication - No active profile set, falling back to 1 default profile: "default"
+2026-01-03 18:29:01 INFO  [restartedMain] o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-01-03 18:29:01 INFO  [restartedMain] o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 26 ms. Found 23 JPA repository interfaces.
+2026-01-03 18:29:01 INFO  [restartedMain] o.s.b.w.e.tomcat.TomcatWebServer - Tomcat initialized with port 8080 (http)
+2026-01-03 18:29:01 INFO  [restartedMain] o.a.catalina.core.StandardService - Starting service [Tomcat]
+2026-01-03 18:29:01 INFO  [restartedMain] o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.34]
+2026-01-03 18:29:01 INFO  [restartedMain] o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2026-01-03 18:29:01 INFO  [restartedMain] o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 170 ms
+2026-01-03 18:29:01 INFO  [restartedMain] o.h.jpa.internal.util.LogHelper - HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-01-03 18:29:01 INFO  [restartedMain] o.h.c.i.RegionFactoryInitiator - HHH000026: Second-level cache disabled
+2026-01-03 18:29:01 INFO  [restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-01-03 18:29:01 INFO  [restartedMain] com.zaxxer.hikari.HikariDataSource - HikariPool-47 - Starting...
+2026-01-03 18:29:01 INFO  [restartedMain] com.zaxxer.hikari.pool.HikariPool - HikariPool-47 - Added connection com.mysql.cj.jdbc.ConnectionImpl@3cd5426d
+2026-01-03 18:29:01 INFO  [restartedMain] com.zaxxer.hikari.HikariDataSource - HikariPool-47 - Start completed.
+2026-01-03 18:29:01 WARN  [restartedMain] org.hibernate.orm.deprecation - HHH90000025: MySQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-01-03 18:29:01 INFO  [restartedMain] o.hibernate.orm.connections.pooling - HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-47)']
+	Database driver: undefined/unknown
+	Database version: 8.0.43
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-01-03 18:29:01 INFO  [restartedMain] o.h.e.t.j.p.i.JtaPlatformInitiator - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-01-03 18:29:01 INFO  [restartedMain] o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-01-03 18:29:01 WARN  [restartedMain] o.s.b.a.o.j.JpaBaseConfiguration$JpaWebConfiguration - spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-01-03 18:29:01 INFO  [restartedMain] o.s.b.a.w.s.WelcomePageHandlerMapping - Adding welcome page: class path resource [static/index.html]
+2026-01-03 18:29:01 INFO  [restartedMain] o.s.b.d.a.OptionalLiveReloadServer - LiveReload server is running on port 35729
+2026-01-03 18:29:01 INFO  [restartedMain] o.s.b.w.e.tomcat.TomcatWebServer - Tomcat started on port 8080 (http) with context path '/'
+2026-01-03 18:29:01 INFO  [restartedMain] c.l.LakshmiGarmentsApplication - Started LakshmiGarmentsApplication in 0.653 seconds (process running for 61574.7)
+2026-01-03 18:29:01 INFO  [restartedMain] o.s.b.d.a.ConditionEvaluationDeltaLoggingListener - Condition evaluation unchanged
+2026-01-03 18:29:15 INFO  [File Watcher] o.s.b.d.a.LocalDevToolsAutoConfiguration$RestartingClassPathChangeChangedEventListener - Restarting due to 1 class path change (0 additions, 0 deletions, 1 modification)
+2026-01-03 18:29:15 INFO  [Thread-187] o.s.b.w.e.tomcat.GracefulShutdown - Commencing graceful shutdown. Waiting for active requests to complete
+2026-01-03 18:29:15 INFO  [tomcat-shutdown] o.s.b.w.e.tomcat.GracefulShutdown - Graceful shutdown complete
+2026-01-03 18:29:15 INFO  [Thread-187] o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-01-03 18:29:15 INFO  [Thread-187] com.zaxxer.hikari.HikariDataSource - HikariPool-47 - Shutdown initiated...
+2026-01-03 18:29:15 INFO  [Thread-187] com.zaxxer.hikari.HikariDataSource - HikariPool-47 - Shutdown completed.
+2026-01-03 18:29:15 INFO  [restartedMain] c.l.LakshmiGarmentsApplication - Starting LakshmiGarmentsApplication using Java 17.0.17 with PID 46300 (C:\Users\KEX1COB\Desktop\PERSONAL\LG\lakshmi-garments-backend\target\classes started by KEX1COB in C:\Users\KEX1COB\Desktop\PERSONAL\LG\lakshmi-garments-backend)
+2026-01-03 18:29:15 INFO  [restartedMain] c.l.LakshmiGarmentsApplication - No active profile set, falling back to 1 default profile: "default"
+2026-01-03 18:29:16 INFO  [restartedMain] o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-01-03 18:29:16 INFO  [restartedMain] o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 26 ms. Found 23 JPA repository interfaces.
+2026-01-03 18:29:16 INFO  [restartedMain] o.s.b.w.e.tomcat.TomcatWebServer - Tomcat initialized with port 8080 (http)
+2026-01-03 18:29:16 INFO  [restartedMain] o.a.catalina.core.StandardService - Starting service [Tomcat]
+2026-01-03 18:29:16 INFO  [restartedMain] o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.34]
+2026-01-03 18:29:16 INFO  [restartedMain] o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2026-01-03 18:29:16 INFO  [restartedMain] o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 169 ms
+2026-01-03 18:29:16 INFO  [restartedMain] o.h.jpa.internal.util.LogHelper - HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-01-03 18:29:16 INFO  [restartedMain] o.h.c.i.RegionFactoryInitiator - HHH000026: Second-level cache disabled
+2026-01-03 18:29:16 INFO  [restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-01-03 18:29:16 INFO  [restartedMain] com.zaxxer.hikari.HikariDataSource - HikariPool-48 - Starting...
+2026-01-03 18:29:16 INFO  [restartedMain] com.zaxxer.hikari.pool.HikariPool - HikariPool-48 - Added connection com.mysql.cj.jdbc.ConnectionImpl@6ca8e2b2
+2026-01-03 18:29:16 INFO  [restartedMain] com.zaxxer.hikari.HikariDataSource - HikariPool-48 - Start completed.
+2026-01-03 18:29:16 WARN  [restartedMain] org.hibernate.orm.deprecation - HHH90000025: MySQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-01-03 18:29:16 INFO  [restartedMain] o.hibernate.orm.connections.pooling - HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-48)']
+	Database driver: undefined/unknown
+	Database version: 8.0.43
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-01-03 18:29:16 INFO  [restartedMain] o.h.e.t.j.p.i.JtaPlatformInitiator - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-01-03 18:29:16 INFO  [restartedMain] o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-01-03 18:29:16 WARN  [restartedMain] o.s.b.a.o.j.JpaBaseConfiguration$JpaWebConfiguration - spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-01-03 18:29:16 INFO  [restartedMain] o.s.b.a.w.s.WelcomePageHandlerMapping - Adding welcome page: class path resource [static/index.html]
+2026-01-03 18:29:16 INFO  [restartedMain] o.s.b.d.a.OptionalLiveReloadServer - LiveReload server is running on port 35729
+2026-01-03 18:29:16 INFO  [restartedMain] o.s.b.w.e.tomcat.TomcatWebServer - Tomcat started on port 8080 (http) with context path '/'
+2026-01-03 18:29:16 INFO  [restartedMain] c.l.LakshmiGarmentsApplication - Started LakshmiGarmentsApplication in 0.64 seconds (process running for 61589.563)
+2026-01-03 18:29:16 INFO  [restartedMain] o.s.b.d.a.ConditionEvaluationDeltaLoggingListener - Condition evaluation unchanged
