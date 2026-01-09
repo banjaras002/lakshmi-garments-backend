@@ -50,7 +50,7 @@ public interface InvoiceRepository extends JpaRepository<Invoice, Long>, JpaSpec
 			+ "i.id = lr.invoice_id AND lr.id = b.lorry_receipt_id AND i.id = ?1", nativeQuery = true)
 	List<Double> findDistinctLengths(Long id);
 	
-	boolean existsByInvoiceNumberAndSupplierName(String invNo, String supplierName);
+	boolean existsByInvoiceNumberAndSupplierNameAndIdNot(String invNo, String supplierName, Long id);
 	
 	
 }

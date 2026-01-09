@@ -19,10 +19,13 @@ INSERT INTO sub_categories (name) VALUES ('half-sleeve');
 INSERT INTO items (name) VALUES ('premium piping');
 
 INSERT INTO employees (name) VALUES ('niresh');
+INSERT INTO employees (name) VALUES ('haris');
 
 INSERT INTO skills (name) VALUES ('cutting');
+INSERT INTO skills (name) VALUES ('stitching');
 
 INSERT INTO employee_skills (employee_id, skill_id) VALUES (1,1);
+INSERT INTO employee_skills (employee_id, skill_id) VALUES (2,2);
 
 -- INSERT INTO batch_statuses (name) VALUES ('Created');
 -- INSERT INTO batch_statuses (name) VALUES ('Work In Progress');

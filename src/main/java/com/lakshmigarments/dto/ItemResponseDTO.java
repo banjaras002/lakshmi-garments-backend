@@ -10,4 +10,6 @@ public class ItemResponseDTO {
     Long id;
 
     String name;
+    
+    Long availableQuantity;
 }

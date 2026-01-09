@@ -17,6 +17,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+
+import com.lakshmigarments.context.UserContext;
+import com.lakshmigarments.context.UserInfo;
 import com.lakshmigarments.controller.JobworkController;
 import com.lakshmigarments.controller.LoginController;
 import com.lakshmigarments.dto.DamageDTO;
@@ -99,6 +102,14 @@ public class JobworkServiceImpl implements JobworkService {
 	@Override
 	@Transactional
 	public Jobwork createJobwork(JobworkRequestDTO jobworkRequestDTO) {
+		
+//		UserInfo userInfo = UserContext.get();
+//		Long userId = Long.valueOf(userInfo.getUserId());
+//		
+//		User user = userRepository.findById(userId).orElseThrow(() -> {
+//			LOGGER.error("User with ID {} not found", userId);
+//			return new UserNotFoundException("User not found with ID " + userId);
+//		});
 
 		Employee employee = employeeRepository.findById(jobworkRequestDTO.getEmployeeId()).orElseThrow(() -> {
 			LOGGER.error("Employee with ID {} not found", jobworkRequestDTO.getEmployeeId());
@@ -137,6 +148,7 @@ public class JobworkServiceImpl implements JobworkService {
 			jobwork.setJobworkOrigin(JobworkOrigin.ORIGINAL);
 			jobwork.setJobworkStatus(JobworkStatus.IN_PROGRESS);
 			jobwork.setRemarks(jobworkRequestDTO.getRemarks());
+			jobwork.setAssignedTo(employee);
 			Jobwork createdJobwork = jobworkRepository.save(jobwork);
 
 			JobworkItem jobworkItem = new JobworkItem();
@@ -155,17 +167,45 @@ public class JobworkServiceImpl implements JobworkService {
 //                return new ItemNotFoundException("Item not found with ID " + jobworkRequestDTO.getItemId());
 //            });
 //        }
-
+		
 		Jobwork jobwork = new Jobwork();
-		jobwork.setBatch(batch);
+		jobwork.setAssignedBy(user);
 		jobwork.setEmployee(employee);
+		jobwork.setBatch(batch);
 		jobwork.setJobworkType(jobworkRequestDTO.getJobworkType());
 		jobwork.setJobworkNumber(jobworkRequestDTO.getJobworkNumber());
 		jobwork.setJobworkOrigin(JobworkOrigin.ORIGINAL);
-		jobwork.setAssignedBy(user);
-		jobworkRepository.save(jobwork);
+		jobwork.setJobworkStatus(JobworkStatus.IN_PROGRESS);
+		jobwork.setRemarks(jobworkRequestDTO.getRemarks());
+		Jobwork createdJobwork = jobworkRepository.save(jobwork);
+		
+		Long totalQuantity = 0L;
+		for (Long quantity : jobworkRequestDTO.getQuantities()) {
+			totalQuantity += quantity;
+		}
+		
+		batch.setAvailableQuantity(batch.getAvailableQuantity() - totalQuantity);
+		batch.setBatchStatus(BatchStatus.ASSIGNED);
+		
+		for (String itemName : jobworkRequestDTO.getItemNames()) {
+			
+			
+			Item existingItem = itemRepository.findByName(itemName).orElseThrow(() -> {
+				LOGGER.error("Item not found with name {}", itemName);
+				return new ItemNotFoundException("Item not found with name " + itemName);
+			});
+			
+			JobworkItem jobworkItem = new JobworkItem();
+			jobworkItem.setJobwork(createdJobwork);
+			jobworkItem.setItem(existingItem);
+			jobworkItem.setQuantity(totalQuantity);
+			jobworkItem.setJobworkStatus(JobworkItemStatus.IN_PROGRESS);
+			jobworkItemRepository.save(jobworkItem);
+			
+		}
 
-		return null;
+	
+		return createdJobwork;
 	}
 
 	@Override

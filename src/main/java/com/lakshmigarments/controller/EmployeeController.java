@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -35,12 +36,28 @@ public class EmployeeController {
     private final EmployeeService employeeService;
 
     @GetMapping
-    public ResponseEntity<List<EmployeeResponseDTO>> getAllEmployees(@RequestParam(required = false) String search) {
-        LOGGER.info("Received request to get all employees");
-        List<EmployeeResponseDTO> employees = employeeService.getAllEmployees(search);
-        LOGGER.info("Employees retrieved successfully");
-        return ResponseEntity.status(HttpStatus.OK).body(employees);
+    public Page<EmployeeResponseDTO> getEmployees(
+            @RequestParam(required = false) Integer pageNo,
+            @RequestParam(required = false) Integer pageSize,
+            @RequestParam(required = false, defaultValue = "name") String sortBy,
+            @RequestParam(required = false, defaultValue = "asc") String sortOrder,
+            @RequestParam(required = false) List<String> employeeNames,
+            @RequestParam(required = false) List<String> skillNames,
+            @RequestParam(required = false) Boolean isActive,
+            @RequestParam(required = false) String search) {
+
+        return employeeService.getEmployees(
+                pageNo,
+                pageSize,
+                sortBy,
+                sortOrder,
+                employeeNames,
+                skillNames,
+                isActive,
+                search
+        );
     }
+
     
     @PostMapping
     public ResponseEntity<EmployeeResponseDTO> createEmployee(

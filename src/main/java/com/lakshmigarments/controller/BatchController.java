@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 import com.lakshmigarments.dto.BatchRequestDTO;
 import com.lakshmigarments.dto.BatchSerialDTO;
+import com.lakshmigarments.dto.BatchTimeline;
 import com.lakshmigarments.dto.BatchTimelineDTO;
 import com.lakshmigarments.model.JobworkType;
 import com.lakshmigarments.dto.BatchResponseDTO;
@@ -46,14 +47,14 @@ public class BatchController {
 	@RequestParam(required = false, defaultValue = "isUrgent") String sortBy,
 	@RequestParam(required = false, defaultValue = "asc") String sortOrder,
 	@RequestParam(required = false) String search,
-	@RequestParam(required = false) List<String> batchStatusNames,
+	@RequestParam(required = false) List<String> batchStatus,
 	@RequestParam(required = false) List<String> categoryNames,
 	@RequestParam(required = false) List<Boolean> isUrgent,
-	@RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date startDate,
-	@RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date endDate
+	@RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") Date startDate,
+	@RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") Date endDate
 	) {
 		LOGGER.info("Received request to get all batches");
-		Page<BatchResponseDTO> batchResponseDTOs = batchService.getAllBatches(pageNo, pageSize, sortBy, sortOrder, search, batchStatusNames, categoryNames, isUrgent, startDate, endDate);
+		Page<BatchResponseDTO> batchResponseDTOs = batchService.getAllBatches(pageNo, pageSize, sortBy, sortOrder, search, batchStatus, categoryNames, isUrgent, startDate, endDate);
 		LOGGER.info("Found {} batches", batchResponseDTOs.getTotalElements());
 		return new ResponseEntity<>(batchResponseDTOs, HttpStatus.OK);
 	}
@@ -83,14 +84,14 @@ public class BatchController {
 		return new ResponseEntity<>(allowedJobworkTypes, HttpStatus.OK);
 	}
 
-//	@GetMapping("/timeline/{batchId}")
-//	public ResponseEntity<List<BatchTimelineDTO>> getBatchTimeline(@PathVariable Long batchId) {
-//		LOGGER.info("Received request to get batch timeline for batch id: {}", batchId);
-//		List<BatchTimelineDTO> batchTimelineDTOs = batchService.getBatchTimeline(batchId);
-//		LOGGER.info("Found {} batch timeline for batch id: {}",
-//				batchTimelineDTOs == null ? 0 : batchTimelineDTOs.size(), batchId);
-//		return new ResponseEntity<>(batchTimelineDTOs, HttpStatus.OK);
-//	}
+	@GetMapping("/timeline/{batchId}")
+	public ResponseEntity<BatchTimeline> getBatchTimeline(@PathVariable Long batchId) {
+		LOGGER.info("Received request to get batch timeline for batch id: {}", batchId);
+		BatchTimeline batchTimeline = batchService.getBatchTimeline(batchId);
+		LOGGER.info("Found {} batch timeline for batch id: {}",
+				batchTimeline == null ? 0 : 1, batchId);
+		return new ResponseEntity<>(batchTimeline, HttpStatus.OK);
+	}
 	
 	@PostMapping("/recycle/{batchId}")
 	public ResponseEntity<Void> recycleBatch(@PathVariable Long batchId) {
@@ -98,4 +99,14 @@ public class BatchController {
 		batchService.recycleBatch(batchId);
 		return new ResponseEntity<>(HttpStatus.OK);
 	}
+	
+	@GetMapping("/{serialCode}/{jobworkType}/availableQuantity")
+	public ResponseEntity<Long> getAvailableQuantity(@PathVariable String serialCode,
+			@PathVariable String jobworkType) {
+		Long availableQuantity = batchService.getAvailableQuantities(serialCode, jobworkType);
+		return new ResponseEntity<>(availableQuantity, HttpStatus.OK);
+	}
+	
+	
+	
 }

@@ -24,9 +24,9 @@ public class BatchItemServiceImpl implements BatchItemService {
     private final ModelMapper modelMapper;
 
     @Override
-    public List<ItemResponseDTO> getItemsByBatchId(Long batchId) {
-        LOGGER.debug("Fetching items by batch id: {}", batchId);
-        List<BatchItem> batchItems = batchItemRepository.findByBatchId(batchId);
+    public List<ItemResponseDTO> getItemsByBatchSerial(String batchSerialCode) {
+        LOGGER.debug("Fetching items by batch serial: {}", batchSerialCode);
+        List<BatchItem> batchItems = batchItemRepository.findByBatchSerialCode(batchSerialCode);
         return batchItems.stream().map(batchItem -> modelMapper.map(batchItem, ItemResponseDTO.class))
                 .collect(Collectors.toList());
     }

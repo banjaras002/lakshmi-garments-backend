@@ -20,6 +20,9 @@ public class Damage {
     private JobworkItem jobworkItem;
     
     @ManyToOne
+    private JobworkReceipt jobworkReceipt;
+    
+    @ManyToOne
     private Item item;
 
     private Long quantity;

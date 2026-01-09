@@ -2,6 +2,7 @@ package com.lakshmigarments.service;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
 import com.lakshmigarments.dto.EmployeeRequestDTO;
@@ -15,7 +16,16 @@ public interface EmployeeService {
 	
 	EmployeeResponseDTO updateEmployee(Long id, EmployeeRequestDTO employeeRequestDTO);
 
-	List<EmployeeResponseDTO> getAllEmployees(String search);
+	public Page<EmployeeResponseDTO> getEmployees(
+	        Integer pageNo,
+	        Integer pageSize,
+	        String sortBy,
+	        String sortOrder,
+	        List<String> employeeNames,
+	        List<String> skillNames,
+	        Boolean isActive,
+	        String search);
+
 	
 	EmployeeStatsDTO getEmployeeStats(Long employeeId);
 

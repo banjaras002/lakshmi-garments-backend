@@ -29,5 +29,7 @@ public class BatchItem {
     @ManyToOne
     @JoinColumn(name = "item_id")
     private Item item;
+    
+    private Long quantity;
 
 }

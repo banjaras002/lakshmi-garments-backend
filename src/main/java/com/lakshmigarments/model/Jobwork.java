@@ -44,6 +44,9 @@ public class Jobwork {
     private User assignedBy;
     
     @ManyToOne
+    private Employee assignedTo;
+    
+    @ManyToOne
     private Jobwork reworkJobwork;
     
     @CreationTimestamp

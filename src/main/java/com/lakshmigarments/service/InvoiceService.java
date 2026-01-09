@@ -172,8 +172,8 @@ public class InvoiceService {
 			return new InvoiceNotFoundException("");
 		});
 		
-		boolean isDuplicate = invoiceRepository.existsByInvoiceNumberAndSupplierName(
-				invoiceDTO.getInvoiceNumber(), invoiceDTO.getSupplierName());
+		boolean isDuplicate = invoiceRepository.existsByInvoiceNumberAndSupplierNameAndIdNot(
+				invoiceDTO.getInvoiceNumber(), invoiceDTO.getSupplierName(), id);
 		if (isDuplicate) {
 			LOGGER.error("Duplicate Invoice");
 			throw new DuplicateInvoiceException("Invoice already exists with same "

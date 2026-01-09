@@ -20,8 +20,8 @@ public interface BatchRepository extends JpaRepository<Batch, Long>, JpaSpecific
 //			+ "b.serial_code = :serialCode AND b.id = jw.id AND jw.id = d."
 //			)
 
-	@Query(value = "SELECT COALESCE(SUM(quantity),0) FROM batch_sub_categories "
-			+ "WHERE serial_code = :serialCode", nativeQuery = true)
+	@Query(value = "SELECT COALESCE(SUM(bsc.quantity),0) FROM batch_sub_categories bsc, batches b "
+			+ "WHERE b.serial_code = :serialCode AND b.id = bsc.batch_id", nativeQuery = true)
 	Long findQuantityBySerialCode(@Param("serialCode") String serialCode);
 
 	// JPQL query to get the latest serial code for a given category

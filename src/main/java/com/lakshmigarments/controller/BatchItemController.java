@@ -27,11 +27,11 @@ public class BatchItemController {
     private final Logger LOGGER = LoggerFactory.getLogger(BatchItemController.class);
     private final BatchItemService batchItemService;
 
-    @GetMapping("/batch/{batchId}")
-    public ResponseEntity<List<ItemResponseDTO>> getItemsByBatchId(@PathVariable Long batchId) {
-        LOGGER.info("Received request to get items by batch id: {}", batchId);
-        List<ItemResponseDTO> items = batchItemService.getItemsByBatchId(batchId);
-        LOGGER.info("Found {} items by batch id: {}", items.size(), batchId);
+    @GetMapping("/batch/{batchSerialCode}")
+    public ResponseEntity<List<ItemResponseDTO>> getItemsByBatchId(@PathVariable String batchSerialCode) {
+        LOGGER.info("Received request to get items by batch serial: {}", batchSerialCode);
+        List<ItemResponseDTO> items = batchItemService.getItemsByBatchSerial(batchSerialCode);
+        LOGGER.info("Found {} items by batch serial: {}", items.size(), batchSerialCode);
         return new ResponseEntity<>(items, HttpStatus.OK);
     }
 

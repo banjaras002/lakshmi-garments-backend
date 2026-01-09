@@ -82,21 +82,38 @@ public static Image tamilTextToPdfImage(String text, float pdfWidthPt) {
 }
 
 
-    private static List<String> wrapText(String text, FontMetrics fm, int maxWidth) {
-        List<String> lines = new ArrayList<>();
+private static List<String> wrapText(String text, FontMetrics fm, int maxWidth) {
+    List<String> lines = new ArrayList<>();
+
+    // 1️⃣ Split by newline first
+    for (String paragraph : text.split("\\r?\\n")) {
+
+        // Preserve empty lines
+        if (paragraph.trim().isEmpty()) {
+            lines.add("");
+            continue;
+        }
+
         StringBuilder line = new StringBuilder();
 
-        for (String word : text.split(" ")) {
-            if (fm.stringWidth(line + word) > maxWidth) {
+        // 2️⃣ Wrap words inside each paragraph
+        for (String word : paragraph.split(" ")) {
+            if (fm.stringWidth(line + (line.length() == 0 ? "" : " ") + word) > maxWidth) {
                 lines.add(line.toString());
                 line = new StringBuilder(word);
             } else {
-                if (!line.isEmpty()) line.append(" ");
+                if (line.length() > 0) line.append(" ");
                 line.append(word);
             }
         }
-        if (!line.isEmpty()) lines.add(line.toString());
-        return lines;
+
+        if (line.length() > 0) {
+            lines.add(line.toString());
+        }
     }
+
+    return lines;
+}
+
 }
 

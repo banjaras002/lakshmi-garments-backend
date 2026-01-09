@@ -7,6 +7,10 @@ import java.util.stream.Collectors;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
@@ -130,22 +134,36 @@ public class EmployeeServiceImpl implements EmployeeService {
 
 	// get all employees
 	@Override
-	public List<EmployeeResponseDTO> getAllEmployees(String search) {
-		Specification<Employee> specification = EmployeeSpecification.filterByName(search);
-		List<Employee> employees = employeeRepository.findAll(specification);
+	public Page<EmployeeResponseDTO> getEmployees(
+	        Integer pageNo,
+	        Integer pageSize,
+	        String sortBy,
+	        String sortOrder,
+	        List<String> employeeNames,
+	        List<String> skillNames,
+	        Boolean isActive,
+	        String search) {
 
-		List<EmployeeResponseDTO> employeeResponseDTOs = employees.stream().map(employee -> {
-			EmployeeResponseDTO dto = modelMapper.map(employee, EmployeeResponseDTO.class);
-			List<EmployeeSkill> employeeSkills = employeeSkillRepository.findByEmployee(employee);
-			List<SkillResponseDTO> skillResponseDTOs = employeeSkills.stream()
-					.map(employeeSkill -> modelMapper.map(employeeSkill.getSkill(), SkillResponseDTO.class))
-					.collect(Collectors.toList());
-			dto.setSkills(skillResponseDTOs);
-			return dto;
-		}).collect(Collectors.toList());
+	    int page = pageNo != null ? pageNo : 0;
+	    int size = pageSize != null ? pageSize : 10;
 
-		return employeeResponseDTOs;
+	    Sort sort = sortOrder.equalsIgnoreCase("desc")
+	            ? Sort.by(sortBy).descending()
+	            : Sort.by(sortBy).ascending();
+
+	    Pageable pageable = PageRequest.of(page, size, sort);
+
+	    Page<Employee> employees = employeeRepository.findEmployees(
+	            employeeNames,
+	            skillNames,
+	            isActive,
+	            search,
+	            pageable
+	    );
+
+	    return employees.map(this::mapToResponseDTO);
 	}
+
 
 	// validate skill IDs
 	private List<Skill> validateSkillIDs(List<Long> skillIDs) {
@@ -163,6 +181,31 @@ public class EmployeeServiceImpl implements EmployeeService {
 		}
 		return skills;
 	}
+	
+	private EmployeeResponseDTO mapToResponseDTO(Employee employee) {
+
+	    EmployeeResponseDTO dto = new EmployeeResponseDTO();
+	    dto.setId(employee.getId());
+	    dto.setName(employee.getName());
+
+	    List<SkillResponseDTO> skills = employee.getEmployeeSkills() != null
+	            ? employee.getEmployeeSkills()
+	                      .stream()
+	                      .map(es -> {
+	                          SkillResponseDTO skillDTO = new SkillResponseDTO();
+	                          skillDTO.setId(es.getSkill().getId());
+	                          skillDTO.setName(es.getSkill().getName());
+	                          return skillDTO;
+	                      })
+	                      .distinct()
+	                      .toList()
+	            : List.of();
+
+	    dto.setSkills(skills);
+
+	    return dto;
+	}
+
 
 	@Override
 	public EmployeeStatsDTO getEmployeeStats(Long employeeId) {

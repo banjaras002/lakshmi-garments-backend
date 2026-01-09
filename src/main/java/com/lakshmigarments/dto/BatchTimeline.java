@@ -12,5 +12,6 @@ import lombok.Setter;
 public class BatchTimeline {
 	
 	private BatchResponseDTO batchDetails;
+	private List<BatchTimelineDetail> timelineDetail;
 
 }

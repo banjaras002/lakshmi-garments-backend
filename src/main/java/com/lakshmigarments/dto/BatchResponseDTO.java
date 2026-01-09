@@ -43,5 +43,7 @@ public class BatchResponseDTO {
 	private Long availableQuantity;
 	
 	private List<BatchSubCategoryResponseDTO> subCategories;
+	
+	private List<ItemResponseDTO> items;
 
 }

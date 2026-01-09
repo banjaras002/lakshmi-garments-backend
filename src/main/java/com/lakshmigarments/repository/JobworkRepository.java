@@ -10,6 +10,8 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 
 import com.lakshmigarments.model.Jobwork;
+import com.lakshmigarments.model.JobworkStatus;
+import com.lakshmigarments.model.JobworkType;
 
 public interface JobworkRepository extends JpaRepository<Jobwork, Long>, JpaSpecificationExecutor<Jobwork> {
 
@@ -32,5 +34,12 @@ public interface JobworkRepository extends JpaRepository<Jobwork, Long>, JpaSpec
             String jobworkNumber,
             Pageable pageable
     );
+	
+	List<Jobwork> findByBatchSerialCode(String serialCode);
+	
+	List<Jobwork> findByBatchSerialCodeAndJobworkStatusIn(
+	        String serialCode,
+	        List<JobworkStatus> jobworkStatuses
+	);
 
 }

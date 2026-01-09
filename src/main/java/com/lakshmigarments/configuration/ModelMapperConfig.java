@@ -9,6 +9,7 @@ import com.lakshmigarments.dto.BaleDTO;
 import com.lakshmigarments.dto.BatchResponseDTO;
 import com.lakshmigarments.dto.BatchResponseDTO.BatchSubCategoryResponseDTO;
 import com.lakshmigarments.dto.SupplierRequestDTO;
+import com.lakshmigarments.dto.WorkflowResponseDTO;
 import com.lakshmigarments.dto.InvoiceDTO;
 import com.lakshmigarments.dto.ItemResponseDTO;
 import com.lakshmigarments.dto.JobworkItemDTO;
@@ -22,6 +23,7 @@ import com.lakshmigarments.model.Invoice;
 import com.lakshmigarments.model.Jobwork;
 import com.lakshmigarments.model.JobworkItem;
 import com.lakshmigarments.model.LorryReceipt;
+import com.lakshmigarments.model.WorkflowRequest;
 
 @Configuration
 public class ModelMapperConfig {
@@ -67,16 +69,20 @@ public class ModelMapperConfig {
 //			mapper.map(src -> src.getEndedAt() != null ? "Completed" : "In Progress", JobworkResponseDTO::setStatus);
 		});
 
+		modelMapper.typeMap(BatchItem.class, ItemResponseDTO.class).addMappings(mapper -> {
+			mapper.map(src -> src.getQuantity(), ItemResponseDTO::setAvailableQuantity);
+		});
+		
+		modelMapper.typeMap(WorkflowRequest.class, WorkflowResponseDTO.class)
+        .addMapping(src -> src.getRequestedBy().getName(), WorkflowResponseDTO::setRequestedBy);
+//        .addMapping(src -> src.getJobworkStatus().name(), JobworkItemDTO::setStatus);
+
 		modelMapper.typeMap(Batch.class, BatchResponseDTO.class).addMappings(mapper -> {
 			mapper.map(src -> src.getCategory().getName(), BatchResponseDTO::setCategoryName);
 //			mapper.map(src -> src.getBatchStatus().getName(), BatchResponseDTO::setBatchStatus);
 		});
 		
-//		modelMapper.typeMap(JobworkItem.class, JobworkItemDTO.class)
-//        .addMapping(src -> src.getItem() != null ? src.getItem().getName() : "", JobworkItemDTO::setItemName)
-//        .addMapping(src -> src.getJobwork().getJobworkNumber(), JobworkItemDTO::setJobworkNumber)
-//        .addMapping(src -> src.getJobworkStatus().name(), JobworkItemDTO::setStatus);
-
+		
 		return modelMapper;
 
 	}

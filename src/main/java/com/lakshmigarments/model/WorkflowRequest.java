@@ -12,49 +12,48 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "batches")
+@Table(name = "workflow_requests")
 @Data
 @NoArgsConstructor
-@AllArgsConstructor
-public class Batch {
+public class WorkflowRequest {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 	
-	@Column(length = 100, nullable = false, unique = true)
-	private String serialCode;
+	@Enumerated(EnumType.STRING)
+    @Column(name = "workflow_request_type", nullable = false, length = 50)
+	private WorkflowRequestType workflowRequestType;
+	
+	@Enumerated(EnumType.STRING)
+    @Column(name = "workflow_request_status", nullable = false, length = 50)
+	private WorkflowRequestStatus workflowRequestStatus;
+	
+	@Lob
+	@Column(columnDefinition = "TEXT")
+	private String payload;
+	
+	@ManyToOne
+	private User requestedBy;
+	
+	@ManyToOne
+	private User approvedBy;
 	
 	@CreationTimestamp
-	private LocalDateTime createdAt;
+	private LocalDateTime requestedAt;
 	
-	private Long availableQuantity;
+	@UpdateTimestamp
+	private LocalDateTime approvedAt;
 	
-	@ManyToOne
-	private User createdBy;
-	
-	@ManyToOne
-	private Category category;
+	private String systemComments;
 	
 	private String remarks;
 	
-	private Boolean isUrgent;
-	
-	@Enumerated(EnumType.STRING)
-    @Column(name = "batch_status", nullable = false)
-    private BatchStatus batchStatus;
-	
-	@UpdateTimestamp
-	private LocalDateTime updatedAt;
-	
-	@ManyToOne
-    private User updatedBy;
-
 }

@@ -6,6 +6,6 @@ import com.lakshmigarments.dto.ItemResponseDTO;
 
 public interface BatchItemService {
 
-    List<ItemResponseDTO> getItemsByBatchId(Long batchId);
+    List<ItemResponseDTO> getItemsByBatchSerial(String serialCode);
     
 }

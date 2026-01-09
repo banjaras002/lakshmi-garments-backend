@@ -9,11 +9,13 @@ import org.springframework.stereotype.Service;
 import com.lakshmigarments.dto.DamageDTO;
 import com.lakshmigarments.dto.JobworkReceiptDTO;
 import com.lakshmigarments.dto.JobworkReceiptItemDTO;
+import com.lakshmigarments.exception.BatchNotFoundException;
 import com.lakshmigarments.exception.ItemNotFoundException;
 import com.lakshmigarments.exception.JobworkItemNotFoundException;
 import com.lakshmigarments.exception.JobworkNotFoundException;
 import com.lakshmigarments.exception.UserNotFoundException;
 import com.lakshmigarments.model.Batch;
+import com.lakshmigarments.model.BatchItem;
 import com.lakshmigarments.model.BatchStatus;
 import com.lakshmigarments.model.Damage;
 import com.lakshmigarments.model.DamageType;
@@ -46,11 +48,13 @@ public class JobworkReceiptServiceImpl implements JobworkReceiptService {
 	private final JobworkReceiptItemRepository receiptItemRepository;
 	private final ItemRepository itemRepository;
 	private final JobworkItemRepository jobworkItemRepository;
+	private final BatchItemRepository batchItemRepository;
 
 	@Override
 	@Transactional
 	public void createJobworkReceipt(JobworkReceiptDTO jobworkReceipt) {
 
+		String batchId = jobworkReceipt.getBatchSerialCode();
 		String jobworkNumber = jobworkReceipt.getJobworkNumber();
 		Long receivedById = jobworkReceipt.getReceivedById();
 		List<JobworkReceiptItemDTO> jobworkReceiptItemDTOs = jobworkReceipt.getJobworkReceiptItems();
@@ -63,6 +67,11 @@ public class JobworkReceiptServiceImpl implements JobworkReceiptService {
 		User user = userRepository.findById(receivedById).orElseThrow(() -> {
 			LOGGER.error("User with ID {} not found", receivedById);
 			return new UserNotFoundException("User not found with ID " + receivedById);
+		});
+		
+		Batch batch = batchRepository.findBySerialCode(batchId).orElseThrow(() -> {
+			LOGGER.error("Batch not found with id {}", batchId);
+			return new BatchNotFoundException("Batch not found with id " + batchId);
 		});
 
 		JobworkReceipt newJobworkReceipt = new JobworkReceipt();
@@ -95,6 +104,14 @@ public class JobworkReceiptServiceImpl implements JobworkReceiptService {
 			jobworkReceiptItem.setJobworkReceipt(createdJobworkReceipt);
 			jobworkReceiptItem.setReceivedQuantity(jobworkReceiptItemDTO.getReturnedQuantity());
 			jobworkReceiptItem.setWagePerItem(jobworkReceiptItemDTO.getWage());
+			
+			// create batch items
+			BatchItem batchItem = new BatchItem();
+			batchItem.setBatch(batch);
+			batchItem.setItem(existingItem);
+			batchItem.setQuantity(jobworkReceiptItemDTO.getReturnedQuantity());
+			batchItemRepository.save(batchItem);
+			
 
 			long totalDamagedQuantity = 0;
 			for (DamageDTO damageDTO : jobworkReceiptItemDTO.getDamages()) {
@@ -102,6 +119,7 @@ public class JobworkReceiptServiceImpl implements JobworkReceiptService {
 				damage.setQuantity(damageDTO.getQuantity());
 				damage.setDamageType(DamageType.fromString(damageDTO.getType()));
 				damage.setJobworkItem(jobworkItem);
+				damage.setJobworkReceipt(createdJobworkReceipt);
 				damageRepository.save(damage);
 				
 				if (DamageType.fromString(damageDTO.getType()) == DamageType.REPAIRABLE) {
@@ -110,11 +128,12 @@ public class JobworkReceiptServiceImpl implements JobworkReceiptService {
 				
 				totalDamagedQuantity += damageDTO.getQuantity();
 			}
-			
+			// TODO to consider the quantity from received receipts
 			long totalQuantityForItem = jobworkReceiptItemDTO.getPurchasedQuantity() + 
-					jobworkReceiptItemDTO.getReturnedQuantity() + totalDamagedQuantity ;
+					jobworkReceiptItemDTO.getReturnedQuantity() + totalDamagedQuantity;
+			totalQuantityForItem += jobworkReceiptRepository.findReturnedUnits(jobwork.getId());
 			if (jobworkItem.getQuantity() == totalQuantityForItem) {
-				Batch batch = jobwork.getBatch();
+//				Batch batch = jobwork.getBatch();
 				batch.setAvailableQuantity(itemCount);
 				jobworkItem.setJobworkStatus(JobworkItemStatus.COMPLETED);
 				batch.setBatchStatus(BatchStatus.COMPLETED);
