@@ -23,7 +23,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.lakshmigarments.dto.UserDTO;
 import com.lakshmigarments.dto.UserResponseDTO;
-import com.lakshmigarments.service.UserService;
+import com.lakshmigarments.dto.request.UserCreateRequest;
+import com.lakshmigarments.dto.response.UserResponse;
+import com.lakshmigarments.service.impl.UserServiceImpl;
 
 @RestController
 @RequestMapping("/users")
@@ -31,9 +33,9 @@ import com.lakshmigarments.service.UserService;
 public class UserController {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(UserController.class);
-	private final UserService userService;
+	private final UserServiceImpl userService;
 
-	public UserController(UserService userService) {
+	public UserController(UserServiceImpl userService) {
 		this.userService = userService;
 	}
 
@@ -57,9 +59,10 @@ public class UserController {
 	}
 
 	@PostMapping
-	public ResponseEntity<UserResponseDTO> createUser(@RequestBody @Validated UserDTO userDTO) {
-		LOGGER.info("Creating user with name: {}", userDTO.getName());
-		return new ResponseEntity<>(userService.createUser(userDTO), HttpStatus.CREATED);
+	public ResponseEntity<UserResponse> createUser(@RequestBody @Validated UserCreateRequest userCreateRequest) {
+		LOGGER.info("Creating user with username: {}", userCreateRequest.getUsername());
+		UserResponse userResponse = userService.createUser(userCreateRequest);
+		return new ResponseEntity<>(userResponse, HttpStatus.CREATED);
 	}
 
 	@PatchMapping("/{id}")

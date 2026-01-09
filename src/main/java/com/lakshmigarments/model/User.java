@@ -22,14 +22,23 @@ import lombok.NoArgsConstructor;
 @Table(name = "users")
 @Data
 @NoArgsConstructor
-public class User {
+public class User extends BaseAuditable {
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 	
-	@Column(length = 200, nullable = false, unique = true)
+	@Column(length = 200, nullable = false)
+	private String firstName;
+	
+	@Column(length = 200)
+	private String lastName;
+	
+	@Column(length = 200, unique = true)
 	private String name;
+
+	@Column(length = 200, nullable = false, unique = true)
+	private String username;
 	
 	@Column(nullable = false)
 	private String password;

@@ -2,8 +2,8 @@ INSERT INTO roles (name) VALUES ('Super Admin');
 INSERT INTO roles (name) VALUES ('Accounts Admin');
 INSERT INTO roles (name) VALUES ('Production Admin');
 
-INSERT INTO users (is_active, name, password, role_id) VALUES (true, 'admin', 'admin', 1);
-INSERT INTO users (is_active, name, password, role_id) VALUES (true, 'bala', 'bala', 2);
+--INSERT INTO users (is_active, name, password, role_id) VALUES (true, 'admin', 'admin', 1);
+--INSERT INTO users (is_active, name, password, role_id) VALUES (true, 'bala', 'bala', 2);
 
 INSERT INTO transports (name) VALUES ('A1');
 

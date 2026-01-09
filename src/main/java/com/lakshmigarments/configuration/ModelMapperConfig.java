@@ -10,6 +10,8 @@ import com.lakshmigarments.dto.BatchResponseDTO;
 import com.lakshmigarments.dto.BatchResponseDTO.BatchSubCategoryResponseDTO;
 import com.lakshmigarments.dto.SupplierRequestDTO;
 import com.lakshmigarments.dto.WorkflowResponseDTO;
+import com.lakshmigarments.dto.request.UserCreateRequest;
+import com.lakshmigarments.dto.response.UserResponse;
 import com.lakshmigarments.dto.InvoiceDTO;
 import com.lakshmigarments.dto.ItemResponseDTO;
 import com.lakshmigarments.dto.JobworkItemDTO;
@@ -23,6 +25,7 @@ import com.lakshmigarments.model.Invoice;
 import com.lakshmigarments.model.Jobwork;
 import com.lakshmigarments.model.JobworkItem;
 import com.lakshmigarments.model.LorryReceipt;
+import com.lakshmigarments.model.User;
 import com.lakshmigarments.model.WorkflowRequest;
 
 @Configuration
@@ -32,6 +35,10 @@ public class ModelMapperConfig {
 	public ModelMapper modelMapper() {
 
 		ModelMapper modelMapper = new ModelMapper();
+		
+		modelMapper.typeMap(User.class, UserResponse.class).addMappings(mapper -> {
+			mapper.map(src -> src.getRole().getName(), UserResponse::setRoleName);
+		});
 
 		modelMapper.typeMap(Invoice.class, InvoiceDTO.class).addMappings(mapper -> {
 			mapper.map(src -> src.getSupplier().getName(), InvoiceDTO::setSupplierName);
