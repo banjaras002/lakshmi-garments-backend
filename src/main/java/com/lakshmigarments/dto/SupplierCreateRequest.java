@@ -7,8 +7,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class SupplierRequestDTO {
-
+public class SupplierCreateRequest {
 	@NotBlank(message = "Supplier name is mandatory")
 	@Size(max = 200, message = "Supplier name must be less than 200 characters")
 	private String name;

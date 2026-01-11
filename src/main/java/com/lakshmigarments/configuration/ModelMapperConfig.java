@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Configuration;
 import com.lakshmigarments.dto.BaleDTO;
 import com.lakshmigarments.dto.BatchResponseDTO;
 import com.lakshmigarments.dto.BatchResponseDTO.BatchSubCategoryResponseDTO;
-import com.lakshmigarments.dto.SupplierRequestDTO;
+import com.lakshmigarments.dto.SupplierCreateRequest;
 import com.lakshmigarments.dto.WorkflowResponseDTO;
 import com.lakshmigarments.dto.request.UserCreateRequest;
 import com.lakshmigarments.dto.response.UserResponse;

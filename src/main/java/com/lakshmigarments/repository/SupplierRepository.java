@@ -12,9 +12,9 @@ import com.lakshmigarments.model.Supplier;
 public interface SupplierRepository extends JpaRepository<Supplier, Long>, 
 	JpaSpecificationExecutor<Supplier> {
 	
-	boolean existsByNameIgnoreCaseAndIdNot(String name, Long id);
+	Boolean existsByNameIgnoreCaseAndIdNot(String name, Long id);
 	
-	boolean existsByNameIgnoreCase(String name);
+	Boolean existsByNameIgnoreCase(String name);
 	
 	Optional<Supplier> findByNameIgnoreCase(String name);
 

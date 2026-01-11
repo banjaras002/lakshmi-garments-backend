@@ -4,16 +4,16 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import com.lakshmigarments.dto.SupplierRequestDTO;
-import com.lakshmigarments.dto.SupplierResponseDTO;
+import com.lakshmigarments.dto.SupplierCreateRequest;
+import com.lakshmigarments.dto.SupplierResponse;
 
 @Service
 public interface SupplierService {
 
-    SupplierResponseDTO createSupplier(SupplierRequestDTO supplierRequestDTO);
+    SupplierResponse createSupplier(SupplierCreateRequest supplierRequestDTO);
 
-    SupplierResponseDTO updateSupplier(Long id, SupplierRequestDTO supplierRequestDTO);
+    SupplierResponse updateSupplier(Long id, SupplierCreateRequest supplierRequestDTO);
 
-    List<SupplierResponseDTO> getAllSuppliers(String search);
+    List<SupplierResponse> getSuppliers(String search);
 
 }
