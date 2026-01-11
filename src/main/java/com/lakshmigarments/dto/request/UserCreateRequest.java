@@ -1,6 +1,7 @@
 package com.lakshmigarments.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
 
 @Data
@@ -12,6 +13,7 @@ public class UserCreateRequest {
 	private String lastName;
 	
 	@NotBlank(message = "Username is required")
+	@Size(min = 3, message = "Username size should be 3 at minimum")
 	private String username;
 	
 	@NotBlank(message = "Password is required")

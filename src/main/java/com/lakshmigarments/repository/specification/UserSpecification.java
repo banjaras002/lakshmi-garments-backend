@@ -17,6 +17,21 @@ public class UserSpecification {
 		return (root, query, criteriaBuilder) -> criteriaBuilder.like(criteriaBuilder.lower(root.get("name")),
 				"%" + name + "%");
 	}
+	
+	public static Specification<User> filterByUsername(String name) {
+		return (root, query, criteriaBuilder) -> criteriaBuilder.like(criteriaBuilder.lower(root.get("username")),
+				"%" + name + "%");
+	}
+	
+	public static Specification<User> filterByFirstName(String name) {
+		return (root, query, criteriaBuilder) -> criteriaBuilder.like(criteriaBuilder.lower(root.get("firstName")),
+				"%" + name + "%");
+	}
+	
+	public static Specification<User> filterByLastName(String name) {
+		return (root, query, criteriaBuilder) -> criteriaBuilder.like(criteriaBuilder.lower(root.get("lastName")),
+				"%" + name + "%");
+	}
 
 	public static Specification<User> filterByRoles(List<String> roleNames) {
 		return (root, query, criteriaBuilder) -> {

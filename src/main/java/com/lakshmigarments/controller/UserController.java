@@ -5,69 +5,70 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.lakshmigarments.dto.UserDTO;
-import com.lakshmigarments.dto.UserResponseDTO;
 import com.lakshmigarments.dto.request.UserCreateRequest;
+import com.lakshmigarments.dto.request.UserUpdateRequest;
 import com.lakshmigarments.dto.response.UserResponse;
-import com.lakshmigarments.service.impl.UserServiceImpl;
+import com.lakshmigarments.service.UserService;
+
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/users")
-@CrossOrigin(origins = "*")
+@RequiredArgsConstructor
 public class UserController {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(UserController.class);
-	private final UserServiceImpl userService;
+	private final UserService userService;
 
-	public UserController(UserServiceImpl userService) {
-		this.userService = userService;
-	}
-
-	// get the list of users of with pagination and sorting
 	@GetMapping
-	public Page<UserResponseDTO> getUsers(@RequestParam(defaultValue = "0") int page,
-			@RequestParam(defaultValue = "7") int size, @RequestParam(defaultValue = "name") String sortBy,
-			@RequestParam(defaultValue = "desc") String order, @RequestParam(required = false) String search,
-			@RequestParam(name = "role", required = false) List<String> roles,
-			@RequestParam(name = "isActive", required = false) List<Boolean> userStatuses) {
-		LOGGER.info("Fetching all users");
-		Sort sort;
-		if ("role".equals(sortBy)) {
-			sort = order.equals("asc") ? Sort.by("role.name").ascending() : Sort.by("role.name").descending();
-		} else {
-			sort = order.equals("asc") ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
-		}
+	public ResponseEntity<Page<UserResponse>> getPaginatedUsers(
+	        @PageableDefault(size = 7, sort = "firstName", direction = Sort.Direction.DESC) Pageable pageable,
+	        @RequestParam(required = false) String search,
+	        @RequestParam(required = false) List<String> roles,
+	        @RequestParam(required = false) List<Boolean> isActive) {
 
-		Pageable pageable = PageRequest.of(page, size, sort);
-		return userService.getPaginatedUsers(pageable, search, roles, userStatuses);
+	    LOGGER.info("Fetching all users with filters - Search: {}, Roles: {}", search, roles);
+
+	    Page<UserResponse> users = userService.getPaginatedUsers(pageable, search, roles, isActive);
+	    return new ResponseEntity<>(users, HttpStatus.OK);
 	}
 
 	@PostMapping
-	public ResponseEntity<UserResponse> createUser(@RequestBody @Validated UserCreateRequest userCreateRequest) {
+	public ResponseEntity<UserResponse> createUser(@RequestBody @Valid UserCreateRequest userCreateRequest) {
 		LOGGER.info("Creating user with username: {}", userCreateRequest.getUsername());
 		UserResponse userResponse = userService.createUser(userCreateRequest);
 		return new ResponseEntity<>(userResponse, HttpStatus.CREATED);
 	}
 
-	@PatchMapping("/{id}")
-	public ResponseEntity<UserResponseDTO> updateUser(@PathVariable Long id, @RequestBody @Validated UserDTO userDTO) {
-		LOGGER.info("Updating user with id: {}", id);
-		return new ResponseEntity<>(userService.updateUser(id, userDTO), HttpStatus.OK);
+	@PutMapping("/{id}")
+	public ResponseEntity<UserResponse> updateUser(@PathVariable Long id, 
+			@RequestBody @Valid UserUpdateRequest userUpdateRequest) {
+		LOGGER.info("Updating user with username: {}", userUpdateRequest.getUsername());
+		UserResponse updatedUser = userService.updateUser(id, userUpdateRequest);
+		return ResponseEntity.ok(updatedUser);
 	}
+	
+	@PatchMapping("/{id}/reset-password")
+	public ResponseEntity<String> resetPassword(@PathVariable Long id) {
+		LOGGER.info("Resetting password for the user with ID {}", id);
+	    String newPassword = userService.adminResetPassword(id);
+	    return ResponseEntity.ok(newPassword);
+	}
+	
 }
