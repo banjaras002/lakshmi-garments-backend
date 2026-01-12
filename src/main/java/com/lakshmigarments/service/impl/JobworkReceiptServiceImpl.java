@@ -5,7 +5,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-
+import org.springframework.web.cors.CorsConfigurationSource;
 import com.lakshmigarments.dto.DamageDTO;
 import com.lakshmigarments.dto.JobworkReceiptDTO;
 import com.lakshmigarments.dto.JobworkReceiptItemDTO;
@@ -26,6 +26,7 @@ import com.lakshmigarments.model.JobworkItemStatus;
 import com.lakshmigarments.model.JobworkReceipt;
 import com.lakshmigarments.model.JobworkReceiptItem;
 import com.lakshmigarments.model.JobworkStatus;
+import com.lakshmigarments.model.JobworkType;
 import com.lakshmigarments.model.User;
 import com.lakshmigarments.repository.*;
 import com.lakshmigarments.service.JobworkReceiptService;
@@ -37,7 +38,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class JobworkReceiptServiceImpl implements JobworkReceiptService {
 
-    private final DamageRepository damageRepository;
+	private final DamageRepository damageRepository;
 
 	private final JobworkReceiptRepository jobworkReceiptRepository;
 
@@ -68,7 +69,7 @@ public class JobworkReceiptServiceImpl implements JobworkReceiptService {
 //			LOGGER.error("User with ID {} not found", receivedById);
 //			return new UserNotFoundException("User not found with ID " + receivedById);
 //		});
-		
+
 		Batch batch = batchRepository.findBySerialCode(batchId).orElseThrow(() -> {
 			LOGGER.error("Batch not found with id {}", batchId);
 			return new BatchNotFoundException("Batch not found with id " + batchId);
@@ -80,22 +81,34 @@ public class JobworkReceiptServiceImpl implements JobworkReceiptService {
 //		newJobworkReceipt.setReceivedBy(user);
 		JobworkReceipt createdJobworkReceipt = jobworkReceiptRepository.save(newJobworkReceipt);
 
-		long itemCount = 0;
+		long itemCount = 0, totalReceivedQuantity = 0;
+		long totalQuantityForJobwork = jobworkRepository.findTotalQuantities(jobworkNumber);
+		
 		for (JobworkReceiptItemDTO jobworkReceiptItemDTO : jobworkReceiptItemDTOs) {
 			String itemName = jobworkReceiptItemDTO.getItemName();
 			Item existingItem = itemRepository.findByName(itemName).orElseThrow(() -> {
 				LOGGER.error("Item not found with name {}", itemName);
 				return new ItemNotFoundException("Item not found with name " + itemName);
 			});
-			
+
 			itemCount += jobworkReceiptItemDTO.getReturnedQuantity();
-			JobworkItem jobworkItem = jobworkItemRepository
-					.findByJobworkJobworkNumber(jobworkNumber).orElseThrow(() -> {
-						LOGGER.error("JobworkItem with jobwork number {} not found", jobworkNumber);
-						return new JobworkItemNotFoundException("JobworkItem not found with jobwork number "
-								+ jobworkNumber);
-					});
-			
+
+			JobworkItem jobworkItem;
+			if (jobwork.getJobworkType() == JobworkType.CUTTING) {
+				jobworkItem = jobworkItemRepository.findByJobworkJobworkNumber(jobworkNumber).orElseThrow(() -> {
+					LOGGER.error("JobworkItem with jobwork number {} not found", jobworkNumber);
+					return new JobworkItemNotFoundException(
+							"JobworkItem not found with jobwork number " + jobworkNumber);
+				});
+			} else {
+				jobworkItem = jobworkItemRepository.findByJobworkJobworkNumberAndItem(jobworkNumber, existingItem)
+						.orElseThrow(() -> {
+							LOGGER.error("JobworkItem with jobwork number {} and item {} not found", jobworkNumber,
+									existingItem.getName());
+							return new JobworkItemNotFoundException("JobworkItem not found with jobwork number "
+									+ jobworkNumber + " and item name " + existingItem.getName());
+						});
+			}
 
 			JobworkReceiptItem jobworkReceiptItem = new JobworkReceiptItem();
 			jobworkReceiptItem.setItem(existingItem);
@@ -104,14 +117,23 @@ public class JobworkReceiptServiceImpl implements JobworkReceiptService {
 			jobworkReceiptItem.setJobworkReceipt(createdJobworkReceipt);
 			jobworkReceiptItem.setReceivedQuantity(jobworkReceiptItemDTO.getReturnedQuantity());
 			jobworkReceiptItem.setWagePerItem(jobworkReceiptItemDTO.getWage());
-			
-			// create batch items
-			BatchItem batchItem = new BatchItem();
-			batchItem.setBatch(batch);
-			batchItem.setItem(existingItem);
-			batchItem.setQuantity(jobworkReceiptItemDTO.getReturnedQuantity());
-			batchItemRepository.save(batchItem);
-			
+
+			// create batch items if cutting - check if this batch item already there
+
+			if (jobwork.getJobworkType() == JobworkType.CUTTING) {
+				BatchItem existingBatchItem = batchItemRepository.findByBatchIdAndItem(batch.getId(), existingItem)
+						.orElse(null);
+				if (existingBatchItem == null) {
+					BatchItem batchItem = new BatchItem();
+					batchItem.setBatch(batch);
+					batchItem.setItem(existingItem);
+					batchItem.setQuantity(jobworkReceiptItemDTO.getReturnedQuantity());
+					batchItemRepository.save(batchItem);
+				} else {
+					existingBatchItem
+							.setQuantity(existingBatchItem.getQuantity() + jobworkReceiptItemDTO.getReturnedQuantity());
+				}
+			}
 
 			long totalDamagedQuantity = 0;
 			for (DamageDTO damageDTO : jobworkReceiptItemDTO.getDamages()) {
@@ -121,38 +143,49 @@ public class JobworkReceiptServiceImpl implements JobworkReceiptService {
 				damage.setJobworkItem(jobworkItem);
 				damage.setJobworkReceipt(createdJobworkReceipt);
 				damageRepository.save(damage);
-				
+
 				if (DamageType.fromString(damageDTO.getType()) == DamageType.REPAIRABLE) {
 					itemCount += damageDTO.getQuantity() == null ? 0 : damageDTO.getQuantity();
 				}
-				
+
 				totalDamagedQuantity += damageDTO.getQuantity();
 			}
 			// TODO to consider the quantity from received receipts
-			long totalQuantityForItem = jobworkReceiptItemDTO.getPurchasedQuantity() + 
-					jobworkReceiptItemDTO.getReturnedQuantity() + totalDamagedQuantity;
+			long totalQuantityForItem = jobworkReceiptItemDTO.getPurchasedQuantity()
+					+ jobworkReceiptItemDTO.getReturnedQuantity() + totalDamagedQuantity;
+			totalReceivedQuantity += totalQuantityForItem;
 			totalQuantityForItem += jobworkReceiptRepository.findReturnedUnits(jobwork.getId());
-			if (jobworkItem.getQuantity() == totalQuantityForItem) {
-//				Batch batch = jobwork.getBatch();
-				batch.setAvailableQuantity(itemCount);
-				jobworkItem.setJobworkStatus(JobworkItemStatus.COMPLETED);
-				batch.setBatchStatus(BatchStatus.COMPLETED);
-				jobwork.setJobworkStatus(JobworkStatus.COMPLETED);
-				batchRepository.save(batch);
-				jobworkRepository.save(jobwork);
-			}
 			
+			System.out.println(totalQuantityForItem + " " + jobworkItem.getQuantity());
+			if (jobworkItem.getQuantity() == totalQuantityForItem) {
+//				batch.setAvailableQuantity(itemCount);
+				jobworkItem.setJobworkStatus(JobworkItemStatus.COMPLETED);
+//				batch.setBatchStatus(BatchStatus.COMPLETED);
+//				jobwork.setJobworkStatus(JobworkStatus.COMPLETED);
+//				batchRepository.save(batch);
+//				jobworkRepository.save(jobwork);
+			}
+//
 			jobworkReceiptItem.setDamagedQuantity(totalDamagedQuantity);
 			receiptItemRepository.save(jobworkReceiptItem);
 
 		}
+		
+		System.out.println("hairs" + totalQuantityForJobwork + totalReceivedQuantity);
+		batch.setAvailableQuantity(itemCount);
+		if (totalQuantityForJobwork == totalReceivedQuantity) {
+			batch.setBatchStatus(BatchStatus.COMPLETED);
+			jobwork.setJobworkStatus(JobworkStatus.COMPLETED);
+			batchRepository.save(batch);
+			jobworkRepository.save(jobwork);
+		}
+
 
 		// increase quantity for batch
-		
-		
-		// TODO to make the batch CLOSED if all jobworks quantity are done for this batch
+
+		// TODO to make the batch CLOSED if all jobworks quantity are done for this
+		// batch
 
 	}
-
 
 }

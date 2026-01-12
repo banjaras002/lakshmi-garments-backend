@@ -17,6 +17,7 @@ INSERT INTO sub_categories (name) VALUES ('sleeve');
 INSERT INTO sub_categories (name) VALUES ('half-sleeve');
 
 INSERT INTO items (name) VALUES ('premium piping');
+INSERT INTO items (name) VALUES ('premium gown model');
 
 INSERT INTO employees (name) VALUES ('niresh');
 INSERT INTO employees (name) VALUES ('haris');

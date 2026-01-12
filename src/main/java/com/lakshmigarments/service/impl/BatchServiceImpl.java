@@ -460,11 +460,11 @@ public class BatchServiceImpl implements BatchService {
 		
 		UserInfo userInfo = UserContext.get();
 		
-		User user = userRepository.findById(Long.valueOf(userInfo.getUserId())).orElseThrow(() -> {
-			LOGGER.error("User with ID {} not found", userInfo.getUserId());
-			return new UserNotFoundException("User not found with ID " + userInfo.getUserId());
-		});
-		
+//		User user = userRepository.findById(Long.valueOf(userInfo.getUserId())).orElseThrow(() -> {
+//			LOGGER.error("User with ID {} not found", userInfo.getUserId());
+//			return new UserNotFoundException("User not found with ID " + userInfo.getUserId());
+//		});
+//		
 		Batch batch = batchRepository.findById(batchId).orElseThrow(() -> {
 			LOGGER.error("Batch not found with id {}", batchId);
 			return new BatchNotFoundException("Batch not found with id " + batchId);

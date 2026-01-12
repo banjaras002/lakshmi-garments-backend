@@ -41,5 +41,9 @@ public interface JobworkRepository extends JpaRepository<Jobwork, Long>, JpaSpec
 	        String serialCode,
 	        List<JobworkStatus> jobworkStatuses
 	);
+	
+	@Query(value = "SELECT SUM(jwi.quantity) FROM jobworks jw, jobwork_items jwi WHERE jw.jobwork_number = :jobworkNumber "
+			+ "AND jw.id = jwi.jobwork_id", nativeQuery = true)
+	Long findTotalQuantities(String jobworkNumber);
 
 }
