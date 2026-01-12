@@ -23,7 +23,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class JobworkReceipt {
+public class JobworkReceipt extends BaseAuditable {
 	
 	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -34,12 +34,6 @@ public class JobworkReceipt {
 	
 	@ManyToOne
 	private Employee completedBy;
-	
-	@ManyToOne
-	private User receivedBy;
-	
-	@CreationTimestamp
-	private LocalDateTime receivedAt;
 	
 	@OneToMany(mappedBy = "jobworkReceipt", fetch = FetchType.LAZY, 
 			cascade = CascadeType.ALL, orphanRemoval = true)

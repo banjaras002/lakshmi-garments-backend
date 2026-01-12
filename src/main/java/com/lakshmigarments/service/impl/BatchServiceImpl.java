@@ -113,10 +113,10 @@ public class BatchServiceImpl implements BatchService {
 			return new CategoryNotFoundException("Category not found with name " + batchRequestDTO.getCategoryName());
 		});
 
-		User user = userRepository.findById(batchRequestDTO.getCreatedByID()).orElseThrow(() -> {
-			LOGGER.error("User with ID {} not found", batchRequestDTO.getCreatedByID());
-			return new UserNotFoundException("User not found with ID " + batchRequestDTO.getCreatedByID());
-		});
+//		User user = userRepository.findById(batchRequestDTO.getCreatedByID()).orElseThrow(() -> {
+//			LOGGER.error("User with ID {} not found", batchRequestDTO.getCreatedByID());
+//			return new UserNotFoundException("User not found with ID " + batchRequestDTO.getCreatedByID());
+//		});
 
 		BatchStatus batchStatus = batchRequestDTO.getBatchStatus() != null ? batchRequestDTO.getBatchStatus()
 				: BatchStatus.CREATED;
@@ -130,7 +130,6 @@ public class BatchServiceImpl implements BatchService {
 		batch.setIsUrgent(batchRequestDTO.getIsUrgent());
 		batch.setRemarks(batchRequestDTO.getRemarks());
 		batch.setAvailableQuantity(batchRequestDTO.getTotalQuantity());
-		batch.setCreatedBy(user);
 
 		Batch createdBatch = batchRepository.save(batch);
 
@@ -162,7 +161,6 @@ public class BatchServiceImpl implements BatchService {
 				inventory.setQuantity(batchSubCategory.getQuantity());
 				inventory.setSubCategory(batchSubCategory.getSubCategory());
 				inventory.setCategory(batch.getCategory());
-				inventory.setCreatedBy(user);
 			
 				ledgerRepository.save(inventory);
 //				inventory.setCount(inventory.getCount() - batchSubCategory.getQuantity());
@@ -238,13 +236,13 @@ public class BatchServiceImpl implements BatchService {
 		//GET details of batch if discarded
 		if (batch.getBatchStatus() == BatchStatus.DISCARDED) {
 			BatchTimelineDetail timelineDetail = new BatchTimelineDetail();
-			timelineDetail.setPerformedAt(batch.getUpdatedAt());
+			timelineDetail.setPerformedAt(batch.getLastModifiedAt());
 //			timelineDetail.setPerformedBy(batch.getUpdatedBy().getName());
 			timelineDetail.setMessage("Batch discarded by " + 
-					batch.getUpdatedBy().getName() + " at " + batch.getUpdatedAt().format(formatter));
+					batch.getLastModifiedBy() + " at " + batch.getLastModifiedAt().format(formatter));
 			
 			String timeTaken = TimeDifferenceUtil.formatDuration(
-					batch.getCreatedAt(), batch.getUpdatedAt());
+					batch.getCreatedAt(), batch.getLastModifiedAt());
 			timelineDetail.setTimeTakenFromPrevious(timeTaken);
 			timelineDetail.setStage(BatchStatus.DISCARDED.toString());
 			batchTimeline.setTimelineDetail(Arrays.asList(timelineDetail));
@@ -257,8 +255,8 @@ public class BatchServiceImpl implements BatchService {
 		List<JobworkReceipt> jobworkReceipts = receiptRepository
 				.findByJobworkBatchSerialCode(batch.getSerialCode());
 		
-		jobworks.sort(Comparator.comparing(Jobwork::getStartedAt));
-		jobworkReceipts.sort(Comparator.comparing(JobworkReceipt::getReceivedAt));
+		jobworks.sort(Comparator.comparing(Jobwork::getCreatedAt));
+		jobworkReceipts.sort(Comparator.comparing(JobworkReceipt::getCreatedAt));
 		System.out.println(jobworks.size());
 		int i = 0, j = 0;
 		while (i < jobworks.size() && j < jobworkReceipts.size()) {
@@ -266,7 +264,7 @@ public class BatchServiceImpl implements BatchService {
 		    JobworkReceipt jwr = jobworkReceipts.get(j);
 
 		    BatchTimelineDetail timelineDetail = new BatchTimelineDetail();
-		    if (jw.getStartedAt().isBefore(jwr.getReceivedAt())) {
+		    if (jw.getCreatedAt().isBefore(jwr.getCreatedAt())) {
 		    	timelineDetail = processJobworkToDetail(jw, timelineDetails, batch); 
 		        i++;
 		    } else {
@@ -301,21 +299,21 @@ public class BatchServiceImpl implements BatchService {
 //		timelineDetail.setAssignedBy(jw.getAssignedBy().getName());
 //        long totalQuantity = jw.getJobworkItems().stream().mapToLong(JobworkItem::getQuantity).sum();
         String message = "Batch assigned to " + jw.getAssignedTo().getName() + " at " + 
-        		jw.getStartedAt().format(formatter) + " by " + jw.getAssignedBy().getName();
+        		jw.getCreatedAt().format(formatter) + " by " + jw.getCreatedBy();
         timelineDetail.setMessage(message);
-        timelineDetail.setPerformedAt(jw.getStartedAt());
+        timelineDetail.setPerformedAt(jw.getCreatedAt());
 //        timelineDetail.setPerformedBy(jw.getEmployee().getName());
         timelineDetail.setStage(jw.getJobworkStatus().toString());
         
         String timeTaken;
         if (timelineDetails.isEmpty()) {
         	timeTaken = TimeDifferenceUtil.formatDuration(
-					batch.getCreatedAt(), jw.getStartedAt());
+					batch.getCreatedAt(), jw.getCreatedAt());
 	        timelineDetail.setTimeTakenFromPrevious(timeTaken);
 		} else {
 			BatchTimelineDetail previousTimelineDetail = timelineDetails.get(timelineDetails.size()-1);
 			timeTaken = TimeDifferenceUtil.formatDuration(
-					previousTimelineDetail.getPerformedAt(), jw.getStartedAt());
+					previousTimelineDetail.getPerformedAt(), jw.getCreatedAt());
 			timelineDetail.setTimeTakenFromPrevious(timeTaken);
 		}
         timelineDetail.setTimeTakenFromPrevious(timeTaken);
@@ -326,19 +324,19 @@ public class BatchServiceImpl implements BatchService {
 			Batch batch) {
 		BatchTimelineDetail timelineDetail = new BatchTimelineDetail(); 
 		String message = "Batch returned by " + jwr.getCompletedBy().getName() + " at " + 
-        		jwr.getReceivedAt().format(formatter) + " to " + jwr.getReceivedBy().getName();
+        		jwr.getCreatedAt().format(formatter) + " to " + jwr.getCreatedBy();
     	timelineDetail.setMessage(message);
     	timelineDetail.setStage("SUBMITTED");
-    	timelineDetail.setPerformedAt(jwr.getReceivedAt());
+    	timelineDetail.setPerformedAt(jwr.getCreatedAt());
     	String timeTaken;
         if (timelineDetails.isEmpty()) {
         	timeTaken = TimeDifferenceUtil.formatDuration(
-					batch.getCreatedAt(), jwr.getReceivedAt());
+					batch.getCreatedAt(), jwr.getCreatedAt());
 	        timelineDetail.setTimeTakenFromPrevious(timeTaken);
 		} else {
 			BatchTimelineDetail previousTimelineDetail = timelineDetails.get(timelineDetails.size()-1);
 			timeTaken = TimeDifferenceUtil.formatDuration(
-					previousTimelineDetail.getPerformedAt(), jwr.getReceivedAt());
+					previousTimelineDetail.getPerformedAt(), jwr.getCreatedAt());
 			timelineDetail.setTimeTakenFromPrevious(timeTaken);
 		}
         return timelineDetail;
@@ -508,7 +506,6 @@ public class BatchServiceImpl implements BatchService {
 			inventory.setQuantity(batchSubCategory.getQuantity());
 			inventory.setSubCategory(batchSubCategory.getSubCategory());
 			inventory.setCategory(batch.getCategory());
-			inventory.setCreatedBy(user);
 		
 			ledgerRepository.save(inventory);
 		}		
@@ -517,7 +514,6 @@ public class BatchServiceImpl implements BatchService {
 		}
 		batch.setBatchStatus(BatchStatus.DISCARDED);
 		batch.setAvailableQuantity(0L);
-		batch.setUpdatedBy(user);
 		batchRepository.save(batch);
 	}
 

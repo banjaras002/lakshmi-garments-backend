@@ -44,8 +44,8 @@ public interface JobworkReceiptRepository extends JpaRepository<JobworkReceipt, 
 		    JOIN r.jobworkReceiptItems i
 		    WHERE (:employeeName IS NULL 
 		           OR LOWER(e.name) LIKE LOWER(CONCAT('%', :employeeName, '%')))
-		      AND (:fromDate IS NULL OR r.receivedAt >= :fromDate)
-		      AND (:toDate IS NULL OR r.receivedAt <= :toDate)
+		      AND (:fromDate IS NULL OR r.createdAt >= :fromDate)
+		      AND (:toDate IS NULL OR r.createdAt <= :toDate)
 		    GROUP BY e.id, e.name
 		    ORDER BY e.name ASC
 		""")

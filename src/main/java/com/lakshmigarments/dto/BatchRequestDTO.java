@@ -24,8 +24,6 @@ public class BatchRequestDTO {
 	private Long totalQuantity;
 	
 	private String remarks;
-	
-	private Long createdByID;
-	
+		
 	private List<BatchSubCategoryRequestDTO> subCategories;
 }

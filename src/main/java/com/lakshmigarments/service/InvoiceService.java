@@ -13,6 +13,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import com.lakshmigarments.context.UserContext;
@@ -28,10 +30,12 @@ import com.lakshmigarments.exception.TransportNotFoundException;
 import com.lakshmigarments.model.Bale;
 import com.lakshmigarments.model.Invoice;
 import com.lakshmigarments.model.LorryReceipt;
+import com.lakshmigarments.model.Role;
 import com.lakshmigarments.model.Supplier;
 import com.lakshmigarments.model.Transport;
 import com.lakshmigarments.repository.InvoiceRepository;
 import com.lakshmigarments.repository.LorryReceiptRepository;
+import com.lakshmigarments.repository.RoleRepository;
 import com.lakshmigarments.repository.SupplierRepository;
 import com.lakshmigarments.repository.TransportRepository;
 import com.lakshmigarments.repository.specification.InvoiceSpecification;
@@ -50,6 +54,7 @@ public class InvoiceService {
 	private final ModelMapper modelMapper;
 	private final SupplierRepository supplierRepository;
 	private final TransportRepository transportRepository;
+	private final RoleRepository roleRepository;
 	private final EditWindowPolicy editWindowPolicy;
 
 
@@ -117,8 +122,17 @@ public class InvoiceService {
 			LOGGER.error("Invoice with ID {} not found", id);
 			return new InvoiceNotFoundException("");
 		});
-		System.out.println(user.getRole());
-		boolean canEdit = editWindowPolicy.canEdit(invoice.getCreatedAt(), user.getRole());
+		
+		Authentication auth =
+			    SecurityContextHolder.getContext().getAuthentication();
+		String role = auth.getAuthorities().stream()
+		        .map(grantedAuthority -> grantedAuthority.getAuthority())
+		        .findFirst()
+		        .map(r -> r.replace("ROLE_", ""))
+		        .orElse(null);
+		
+
+		boolean canEdit = editWindowPolicy.canEdit(invoice.getCreatedAt(), role);
 
 		CompleteInvoiceDTO completeInvoiceDTO = new CompleteInvoiceDTO();
 		completeInvoiceDTO.setId(invoice.getId());

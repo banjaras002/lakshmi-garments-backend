@@ -23,7 +23,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Batch {
+public class Batch extends BaseAuditable {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -32,13 +32,7 @@ public class Batch {
 	@Column(length = 100, nullable = false, unique = true)
 	private String serialCode;
 	
-	@CreationTimestamp
-	private LocalDateTime createdAt;
-	
 	private Long availableQuantity;
-	
-	@ManyToOne
-	private User createdBy;
 	
 	@ManyToOne
 	private Category category;
@@ -50,11 +44,5 @@ public class Batch {
 	@Enumerated(EnumType.STRING)
     @Column(name = "batch_status", nullable = false)
     private BatchStatus batchStatus;
-	
-	@UpdateTimestamp
-	private LocalDateTime updatedAt;
-	
-	@ManyToOne
-    private User updatedBy;
 
 }

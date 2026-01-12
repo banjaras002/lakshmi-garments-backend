@@ -61,7 +61,7 @@ public class ExcelFileGeneratorServiceImpl implements ExcelFileGeneratorService 
             row.createCell(5).setCellValue(ledger.getCategory().getName());
             row.createCell(6).setCellValue(ledger.getSubCategory().getName());
             row.createCell(7).setCellValue(ledger.getQuantity());
-            row.createCell(8).setCellValue(ledger.getCreatedBy().getName());
+            row.createCell(8).setCellValue(ledger.getCreatedBy());
         }
 
         // Write to byte array

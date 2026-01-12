@@ -23,7 +23,7 @@ import lombok.NoArgsConstructor;
 @Table(name = "invoices", uniqueConstraints = { @UniqueConstraint(columnNames = { "invoice_number", "supplier_id" }) })
 @Data
 @NoArgsConstructor
-public class Invoice {
+public class Invoice extends BaseAuditable {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -43,12 +43,6 @@ public class Invoice {
 	private Transport transport;
 
 	private Double transportCost;
-
-	@ManyToOne
-	private User createdBy;
-
-	@CreationTimestamp
-	private LocalDateTime createdAt;
 
 	@ColumnDefault("false")
 	private Boolean isPaid;

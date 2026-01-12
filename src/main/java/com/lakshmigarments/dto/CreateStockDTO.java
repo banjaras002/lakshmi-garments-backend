@@ -45,11 +45,6 @@ public class CreateStockDTO {
 	
 	private Boolean isTransportPaid;
 	
-	private Long createdById;
-	
-	@CreationTimestamp
-	private Long createdAt;
-	
 	@NotNull
 	private List<CreateLorryReceiptDTO> lorryReceipts;
 }

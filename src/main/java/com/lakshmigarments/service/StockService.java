@@ -100,11 +100,6 @@ public class StockService {
 			return new TransportNotFoundException("Transport not found with ID " + transportID);
 		});
 		
-		User user = userRepository.findById(createStockDTO.getCreatedById()).orElseThrow(() -> {
-			LOGGER.error("User with ID {} not found", createStockDTO.getCreatedById());
-			return new UserNotFoundException("User not found with ID " + createStockDTO.getCreatedById());
-		});
-		
 		Invoice invoice = new Invoice();
 		invoice.setInvoiceDate(createStockDTO.getInvoiceDate());
 		invoice.setInvoiceNumber(createStockDTO.getInvoiceNumber());
@@ -118,7 +113,6 @@ public class StockService {
 		invoice.setIsPaid(createStockDTO.getIsTransportPaid());
 		invoice.setTransport(transport);
 		invoice.setSupplier(supplier);
-		invoice.setCreatedBy(user);
 		
 		HashMap<LorryReceipt, List<Bale>> lrBaleMap = new HashMap<>();
 		
@@ -194,7 +188,6 @@ public class StockService {
 					inventory.setQuantity(bale.getQuantity());
 					inventory.setSubCategory(bale.getSubCategory());
 					inventory.setCategory(bale.getCategory());
-					inventory.setCreatedBy(user);
 				
 		        ledgerRepository.save(inventory);
 

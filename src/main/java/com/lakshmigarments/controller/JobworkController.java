@@ -39,7 +39,7 @@ public class JobworkController {
 
     @GetMapping
     public ResponseEntity<Page<JobworkResponseDTO>> getAllJobworks(@RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "7") int size, @RequestParam(defaultValue = "startedAt") String sortBy,
+            @RequestParam(defaultValue = "7") int size, @RequestParam(defaultValue = "createdAt") String sortBy,
             @RequestParam(defaultValue = "desc") String order, @RequestParam(required = false) String search) {
         return new ResponseEntity<>(
                 jobworkService.getAllJobworks(PageRequest.of(page, size, Sort.by(sortBy).descending()), search),

@@ -14,7 +14,7 @@ public class JobworkReceiptDTO {
 	
 	private String batchSerialCode;
 	private String jobworkNumber;
-	private Long receivedById;
+//	private Long receivedById;
 	private List<JobworkReceiptItemDTO> jobworkReceiptItems;
 
 }

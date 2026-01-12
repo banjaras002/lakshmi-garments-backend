@@ -20,7 +20,7 @@ public class JobworkRequestDTO {
 	private List<Long> quantities;
 	private JobworkType jobworkType;
 	private String jobworkNumber;
-	private Long assignedBy;
+//	private Long assignedBy;
 	private String remarks;
 
 }

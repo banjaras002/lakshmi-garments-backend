@@ -46,6 +46,7 @@ import com.lakshmigarments.exception.ItemNotFoundException;
 import com.lakshmigarments.exception.JobworkNotFoundException;
 import com.lakshmigarments.exception.JobworkTypeNotFoundException;
 import com.lakshmigarments.exception.UserNotFoundException;
+import com.lakshmigarments.repository.BatchItemRepository;
 import com.lakshmigarments.repository.BatchRepository;
 import com.lakshmigarments.repository.EmployeeRepository;
 import com.lakshmigarments.repository.ItemRepository;
@@ -71,6 +72,7 @@ public class JobworkServiceImpl implements JobworkService {
 	private final UserRepository userRepository;
 	private final JobworkItemRepository jobworkItemRepository;
 	private final JobworkReceiptRepository jobworkReceiptRepository;
+	private final BatchItemRepository batchItemRepository;
 
 	public Page<JobworkResponseDTO> getAllJobworks(Pageable pageable, String search) {
 
@@ -115,10 +117,10 @@ public class JobworkServiceImpl implements JobworkService {
 			return new EmployeeNotFoundException("Employee not found with ID " + jobworkRequestDTO.getEmployeeId());
 		});
 
-		User user = userRepository.findById(jobworkRequestDTO.getAssignedBy()).orElseThrow(() -> {
-			LOGGER.error("User with ID {} not found", jobworkRequestDTO.getAssignedBy());
-			return new UserNotFoundException("User not found with ID " + jobworkRequestDTO.getAssignedBy());
-		});
+//		User user = userRepository.findById(jobworkRequestDTO.getAssignedBy()).orElseThrow(() -> {
+//			LOGGER.error("User with ID {} not found", jobworkRequestDTO.getAssignedBy());
+//			return new UserNotFoundException("User not found with ID " + jobworkRequestDTO.getAssignedBy());
+//		});
 
 		Batch batch = batchRepository.findBySerialCode(jobworkRequestDTO.getBatchSerialCode()).orElseThrow(() -> {
 			LOGGER.error("Batch with serial code {} not found", jobworkRequestDTO.getBatchSerialCode());
@@ -139,8 +141,8 @@ public class JobworkServiceImpl implements JobworkService {
 			batch.setBatchStatus(BatchStatus.ASSIGNED);
 
 			Jobwork jobwork = new Jobwork();
-			jobwork.setAssignedBy(user);
-			jobwork.setEmployee(employee);
+//			jobwork.setAssignedBy(user);
+			jobwork.setAssignedTo(employee);
 			jobwork.setBatch(batch);
 			jobwork.setJobworkType(jobworkRequestDTO.getJobworkType());
 			jobwork.setJobworkNumber(jobworkRequestDTO.getJobworkNumber());
@@ -168,8 +170,8 @@ public class JobworkServiceImpl implements JobworkService {
 //        }
 		
 		Jobwork jobwork = new Jobwork();
-		jobwork.setAssignedBy(user);
-		jobwork.setEmployee(employee);
+//		jobwork.setAssignedBy(user);
+		jobwork.setAssignedTo(employee);
 		jobwork.setBatch(batch);
 		jobwork.setJobworkType(jobworkRequestDTO.getJobworkType());
 		jobwork.setJobworkNumber(jobworkRequestDTO.getJobworkNumber());
@@ -186,8 +188,8 @@ public class JobworkServiceImpl implements JobworkService {
 		batch.setAvailableQuantity(batch.getAvailableQuantity() - totalQuantity);
 		batch.setBatchStatus(BatchStatus.ASSIGNED);
 		
+		int i = 0; 
 		for (String itemName : jobworkRequestDTO.getItemNames()) {
-			
 			
 			Item existingItem = itemRepository.findByName(itemName).orElseThrow(() -> {
 				LOGGER.error("Item not found with name {}", itemName);
@@ -197,10 +199,11 @@ public class JobworkServiceImpl implements JobworkService {
 			JobworkItem jobworkItem = new JobworkItem();
 			jobworkItem.setJobwork(createdJobwork);
 			jobworkItem.setItem(existingItem);
-			jobworkItem.setQuantity(totalQuantity);
+			jobworkItem.setQuantity(jobworkRequestDTO.getQuantities().get(i));
 			jobworkItem.setJobworkStatus(JobworkItemStatus.IN_PROGRESS);
 			jobworkItemRepository.save(jobworkItem);
-			
+						
+			i += 1;
 		}
 
 	
@@ -244,9 +247,9 @@ public class JobworkServiceImpl implements JobworkService {
 		}
 
 		JobworkDetailDTO dto = new JobworkDetailDTO();
-		dto.setStartedAt(jobwork.getStartedAt());
-		dto.setAssignedBy(jobwork.getAssignedBy().getName());
-		dto.setAssignedTo(jobwork.getEmployee().getName());
+		dto.setStartedAt(jobwork.getCreatedAt());
+		dto.setAssignedBy(jobwork.getCreatedBy());
+		dto.setAssignedTo(jobwork.getAssignedTo().getName());
 		dto.setBatchSerialCode(jobwork.getBatch().getSerialCode());
 		dto.setJobworkNumber(jobworkNumber);
 		dto.setJobworkOrigin(jobwork.getJobworkOrigin().name());
@@ -337,11 +340,11 @@ public class JobworkServiceImpl implements JobworkService {
 	private JobworkResponseDTO mapToDTO(Jobwork jobwork, List<JobworkReceipt> receipts) {
 		JobworkResponseDTO jobworkResponseDTO = new JobworkResponseDTO();
 		jobworkResponseDTO.setId(jobwork.getId());
-		jobworkResponseDTO.setAssignedTo(jobwork.getEmployee().getName());
+		jobworkResponseDTO.setAssignedTo(jobwork.getAssignedTo().getName());
 		jobworkResponseDTO.setBatchSerial(jobwork.getBatch().getSerialCode());
 		jobworkResponseDTO.setJobworkType(jobwork.getJobworkType().toString());
 		jobworkResponseDTO.setJobworkNumber(jobwork.getJobworkNumber());
-		jobworkResponseDTO.setStartedAt(jobwork.getStartedAt());
+		jobworkResponseDTO.setStartedAt(jobwork.getCreatedAt());
 
 		List<JobworkItem> jobworkItems = jobwork.getJobworkItems();
 		long totalIssuedQty = jobwork.getJobworkItems().stream().mapToLong(JobworkItem::getQuantity).sum();
@@ -417,9 +420,9 @@ public class JobworkServiceImpl implements JobworkService {
 
 	    // 🔹 Create new Jobwork
 	    Jobwork reAssignedJobwork = new Jobwork();
-	    reAssignedJobwork.setAssignedBy(jobwork.getAssignedBy());
+	    reAssignedJobwork.setCreatedBy(jobwork.getCreatedBy());
 	    reAssignedJobwork.setBatch(jobwork.getBatch());
-	    reAssignedJobwork.setEmployee(employee);
+	    reAssignedJobwork.setAssignedTo(employee);
 	    reAssignedJobwork.setJobworkNumber(getNextJobworkNumber());
 	    reAssignedJobwork.setJobworkOrigin(JobworkOrigin.REASSIGNED);
 	    reAssignedJobwork.setJobworkStatus(JobworkStatus.IN_PROGRESS);

@@ -14,14 +14,14 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Jobwork {
+public class Jobwork extends BaseAuditable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    private Employee employee;
+//    @ManyToOne
+//    private Employee employee;
 
     @ManyToOne
     private Batch batch;
@@ -40,8 +40,8 @@ public class Jobwork {
     @Column(name = "jobwork_status", nullable = false, length = 50)
     private JobworkStatus jobworkStatus;
     
-    @ManyToOne
-    private User assignedBy;
+//    @ManyToOne
+//    private User assignedBy;
     
     @ManyToOne
     private Employee assignedTo;
@@ -49,8 +49,8 @@ public class Jobwork {
     @ManyToOne
     private Jobwork reworkJobwork;
     
-    @CreationTimestamp
-    private LocalDateTime startedAt;
+//    @CreationTimestamp
+//    private LocalDateTime startedAt;
 
     private String remarks;
     

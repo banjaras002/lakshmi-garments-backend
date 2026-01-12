@@ -127,9 +127,7 @@ public class BaleServiceImpl implements BaleService {
     	inventory.setReferenceType(ReferenceType.BALE);
     	inventory.setReference_id(bale.getId());
     	inventory.setUnit("piece(s)");
-		
-		inventory.setCreatedBy(user);
-	
+			
 		
 
 		/*
@@ -175,7 +173,6 @@ public class BaleServiceImpl implements BaleService {
 				inventoryForNewCategory.setSubCategory(newSubCategory);
 				inventoryForNewCategory.setCategory(newCategory);
 				inventoryForNewCategory.setDirection(LedgerDirection.IN);
-				inventoryForNewCategory.setCreatedBy(user);
 				ledgerRepository.save(inventoryForNewCategory);
 			}
 //            // Revert OLD inventory

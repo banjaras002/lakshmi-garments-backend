@@ -56,7 +56,7 @@ public class JobworkReceiptServiceImpl implements JobworkReceiptService {
 
 		String batchId = jobworkReceipt.getBatchSerialCode();
 		String jobworkNumber = jobworkReceipt.getJobworkNumber();
-		Long receivedById = jobworkReceipt.getReceivedById();
+//		Long receivedById = jobworkReceipt.getReceivedById();
 		List<JobworkReceiptItemDTO> jobworkReceiptItemDTOs = jobworkReceipt.getJobworkReceiptItems();
 
 		Jobwork jobwork = jobworkRepository.findByJobworkNumber(jobworkNumber).orElseThrow(() -> {
@@ -64,10 +64,10 @@ public class JobworkReceiptServiceImpl implements JobworkReceiptService {
 			return new JobworkNotFoundException("Jobwork with number " + jobworkNumber + " not found");
 		});
 
-		User user = userRepository.findById(receivedById).orElseThrow(() -> {
-			LOGGER.error("User with ID {} not found", receivedById);
-			return new UserNotFoundException("User not found with ID " + receivedById);
-		});
+//		User user = userRepository.findById(receivedById).orElseThrow(() -> {
+//			LOGGER.error("User with ID {} not found", receivedById);
+//			return new UserNotFoundException("User not found with ID " + receivedById);
+//		});
 		
 		Batch batch = batchRepository.findBySerialCode(batchId).orElseThrow(() -> {
 			LOGGER.error("Batch not found with id {}", batchId);
@@ -75,9 +75,9 @@ public class JobworkReceiptServiceImpl implements JobworkReceiptService {
 		});
 
 		JobworkReceipt newJobworkReceipt = new JobworkReceipt();
-		newJobworkReceipt.setCompletedBy(jobwork.getEmployee());
+		newJobworkReceipt.setCompletedBy(jobwork.getAssignedTo());
 		newJobworkReceipt.setJobwork(jobwork);
-		newJobworkReceipt.setReceivedBy(user);
+//		newJobworkReceipt.setReceivedBy(user);
 		JobworkReceipt createdJobworkReceipt = jobworkReceiptRepository.save(newJobworkReceipt);
 
 		long itemCount = 0;

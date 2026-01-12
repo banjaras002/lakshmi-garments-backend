@@ -44,7 +44,7 @@ public class ModelMapperConfig {
 			mapper.map(src -> src.getSupplier().getName(), InvoiceDTO::setSupplierName);
 			mapper.map(src -> src.getTransport().getName(), InvoiceDTO::setTransportName);
 			mapper.map(src -> src.getIsPaid(), InvoiceDTO::setIsTransportPaid);
-			mapper.map(src -> src.getCreatedBy().getName(), InvoiceDTO::setCreatedBy);
+//			mapper.map(src -> src.getCreatedBy().getName(), InvoiceDTO::setCreatedBy);
 			
 		});
 
@@ -55,7 +55,7 @@ public class ModelMapperConfig {
 
 		modelMapper.typeMap(Batch.class, BatchResponseDTO.class).addMappings(mapper -> {
 			mapper.map(src -> src.getCategory().getName(), BatchResponseDTO::setCategoryName);
-			mapper.map(src -> src.getCreatedBy().getName(), BatchResponseDTO::setCreatedBy);
+//			mapper.map(src -> src.getCreatedBy().getName(), BatchResponseDTO::setCreatedBy);
 		});
 
 		modelMapper.typeMap(BatchSubCategory.class, BatchSubCategoryResponseDTO.class).addMappings(mapper -> {

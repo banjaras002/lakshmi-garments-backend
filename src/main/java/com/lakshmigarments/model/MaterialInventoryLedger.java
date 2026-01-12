@@ -22,7 +22,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class MaterialInventoryLedger {
+public class MaterialInventoryLedger extends BaseAuditable {
 	
 	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -53,11 +53,5 @@ public class MaterialInventoryLedger {
 	private Long reference_id;
 	
 	private String remarks;
-	
-	@ManyToOne
-	private User createdBy;
-	
-	@CreationTimestamp
-	private LocalDateTime createdAt;
 
 }
