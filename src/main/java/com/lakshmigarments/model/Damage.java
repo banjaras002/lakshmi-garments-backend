@@ -15,20 +15,12 @@ public class Damage {
     @Id
     @GeneratedValue(strategy=GenerationType.IDENTITY)
     private Long id;
-
-    @ManyToOne
-    private JobworkItem jobworkItem;
     
     @ManyToOne
     private JobworkReceipt jobworkReceipt;
-    
-    @ManyToOne
-    private Item item;
 
     private Long quantity;
     
-    private Integer completedQuantity;
-
     @Enumerated(EnumType.STRING)
     @Column(name = "damage_type", nullable = false)
     private DamageType damageType;

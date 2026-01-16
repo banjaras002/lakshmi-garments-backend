@@ -10,6 +10,7 @@ import com.lakshmigarments.dto.BatchDetailDTO;
 import com.lakshmigarments.dto.BatchRequestDTO;
 import com.lakshmigarments.dto.BatchResponseDTO;
 import com.lakshmigarments.dto.BatchUpdateDTO;
+import com.lakshmigarments.model.Batch;
 import com.lakshmigarments.model.JobworkType;
 
 import org.springframework.data.domain.Page;
@@ -32,12 +33,18 @@ public interface BatchService {
 
     void updateBatch(Long batchId, BatchUpdateDTO batchUpdateDTO);
     
-    List<JobworkType> getJobworkTypes(String batchSerialCode);
+    List<JobworkType> getAllowedJobworkTypes(String batchSerialCode);
     
     void recycleBatch(Long batchId);
     
     List<BatchDetailDTO> getBatchDetails(Long batchId);
     
     Long getAvailableQuantities(String serialCode, String jobworkType);
+    
+    Long getAvailableQuantitiesForCutting(String serialCode);
+    
+    List<String> getBatchSerialCodesForJobwork();
+    
+    void recalculateBatchStatus(Batch batch);
     
 }

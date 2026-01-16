@@ -11,7 +11,7 @@ import lombok.Setter;
 @AllArgsConstructor
 public class PaydayDTO {
 
-	private String employeeName;
+//	private String employeeName;
 	private Long completedJobworkCount;
 	private Long totalQuantities;
 	private Long totalDamages;

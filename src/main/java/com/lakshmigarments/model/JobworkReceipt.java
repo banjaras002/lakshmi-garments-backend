@@ -32,9 +32,6 @@ public class JobworkReceipt extends BaseAuditable {
 	@ManyToOne
 	private Jobwork jobwork;
 	
-	@ManyToOne
-	private Employee completedBy;
-	
 	@OneToMany(mappedBy = "jobworkReceipt", fetch = FetchType.LAZY, 
 			cascade = CascadeType.ALL, orphanRemoval = true)
     private List<JobworkReceiptItem> jobworkReceiptItems;

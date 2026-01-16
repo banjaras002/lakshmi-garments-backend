@@ -32,6 +32,6 @@ public class PaydayServiceImpl implements PaydayService {
 		LOGGER.info("Fetching payday summary | employeeName={}, fromDate={}, toDate={}", employeeName, fromDate,
 				toDate);
 
-		return receiptRepository.getPaydaySummary(employeeName, fromDate, toDate, pageable);
+		return receiptRepository.getPaydaySummary(fromDate, toDate, pageable);
 	}
 }

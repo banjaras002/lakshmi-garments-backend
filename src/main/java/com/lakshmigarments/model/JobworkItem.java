@@ -37,7 +37,7 @@ public class JobworkItem {
 	private Long quantity;
 	
     @Enumerated(EnumType.STRING)
-    @Column(name = "jobwork_status", nullable = false)
-    private JobworkItemStatus jobworkStatus;
+    @Column(name = "jobwork_status", nullable = false, length = 100)
+    private JobworkItemStatus jobworkItemStatus;
 
 }

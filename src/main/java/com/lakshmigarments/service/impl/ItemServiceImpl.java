@@ -1,7 +1,7 @@
 package com.lakshmigarments.service.impl;
 
 import com.lakshmigarments.dto.ItemRequestDTO;
-import com.lakshmigarments.dto.ItemResponseDTO;
+import com.lakshmigarments.dto.response.BatchItemResponse;
 import com.lakshmigarments.exception.DuplicateItemException;
 import com.lakshmigarments.exception.ItemNotFoundException;
 import com.lakshmigarments.model.Item;
@@ -27,7 +27,7 @@ public class ItemServiceImpl implements ItemService {
 	private final ModelMapper modelMapper;
 
 	@Override
-	public ItemResponseDTO createItem(ItemRequestDTO item) {
+	public BatchItemResponse createItem(ItemRequestDTO item) {
 		String itemName = item.getName().trim();
 
 		if (itemRepository.existsByNameIgnoreCase(itemName)) {
@@ -40,11 +40,11 @@ public class ItemServiceImpl implements ItemService {
 
 		Item savedItem = itemRepository.save(newItem);
 		LOGGER.debug("Item created with name {}", savedItem.getName());
-		return modelMapper.map(savedItem, ItemResponseDTO.class);
+		return modelMapper.map(savedItem, BatchItemResponse.class);
 	}
 
 	@Override
-	public ItemResponseDTO updateItem(Long id, ItemRequestDTO itemRequestDTO) {
+	public BatchItemResponse updateItem(Long id, ItemRequestDTO itemRequestDTO) {
 
 	    Item existingItem = itemRepository.findById(id).orElseThrow(() -> {
 	        LOGGER.error("Item not found with id {}", id);
@@ -63,7 +63,7 @@ public class ItemServiceImpl implements ItemService {
 	    Item updatedItem = itemRepository.save(existingItem);
 
 	    LOGGER.debug("Item updated with id {}", updatedItem.getId());
-	    return modelMapper.map(updatedItem, ItemResponseDTO.class);
+	    return modelMapper.map(updatedItem, BatchItemResponse.class);
 	}
 
 
@@ -80,12 +80,12 @@ public class ItemServiceImpl implements ItemService {
 	}
 
 	@Override
-	public List<ItemResponseDTO> getAllItems(String search) {
+	public List<BatchItemResponse> getAllItems(String search) {
 		Specification<Item> specification = ItemSpecification.filterByName(search);
 		List<Item> items = itemRepository.findAll(specification);
 
-		List<ItemResponseDTO> itemResponseDTOs = items.stream()
-				.map(item -> modelMapper.map(item, ItemResponseDTO.class)).collect(Collectors.toList());
+		List<BatchItemResponse> itemResponseDTOs = items.stream()
+				.map(item -> modelMapper.map(item, BatchItemResponse.class)).collect(Collectors.toList());
 
 		return itemResponseDTOs;
 	}

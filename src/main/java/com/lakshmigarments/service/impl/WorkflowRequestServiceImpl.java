@@ -21,8 +21,8 @@ import com.lakshmigarments.configuration.ObjectMapperConfig;
 import com.lakshmigarments.context.UserContext;
 import com.lakshmigarments.context.UserInfo;
 import com.lakshmigarments.controller.UserController;
-import com.lakshmigarments.dto.JobworkReceiptDTO;
 import com.lakshmigarments.dto.WorkflowResponseDTO;
+import com.lakshmigarments.dto.request.CreateJobworkReceiptRequest;
 import com.lakshmigarments.exception.JobworkNotFoundException;
 import com.lakshmigarments.exception.UserNotFoundException;
 import com.lakshmigarments.exception.WorkflowRequestNotFoundException;
@@ -71,7 +71,7 @@ public class WorkflowRequestServiceImpl implements WorkflowRequestService {
 //		}
 //		
 		UserInfo userInfo = UserContext.get();
-		User user = userRepository.findById(Long.valueOf(userInfo.getUserId())).orElse(null);
+		User user = userRepository.findById(Long.valueOf(1)).orElse(null);
 		
 		if (workflowRequestDTO.getRequestType() == WorkflowRequestType.JOBWORK_RECEIPT.toString()) {
 			try {

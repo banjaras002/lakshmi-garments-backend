@@ -25,7 +25,7 @@ public class LorryReceipt {
 	private Long id;
 	
 	@Column(length = 100, nullable = false)
-	private String LRNumber;
+	private String LrNumber;
 	
 	@ManyToOne
 	private Invoice invoice;

@@ -1,11 +1,11 @@
-package com.lakshmigarments.dto;
+package com.lakshmigarments.dto.response;
 
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
-public class ItemResponseDTO {
+public class BatchItemResponse {
 
     Long id;
 

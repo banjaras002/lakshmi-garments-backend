@@ -9,13 +9,14 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 
+import com.lakshmigarments.model.Batch;
 import com.lakshmigarments.model.Jobwork;
 import com.lakshmigarments.model.JobworkStatus;
 import com.lakshmigarments.model.JobworkType;
 
 public interface JobworkRepository extends JpaRepository<Jobwork, Long>, JpaSpecificationExecutor<Jobwork> {
 
-	Optional<Jobwork> findByJobworkNumber(String jobworkNumber);	
+	Optional<Jobwork> findByJobworkNumber(String jobworkNumber);
 
 	@Query("SELECT j FROM Jobwork j WHERE j.id IN (" + "SELECT MIN(j2.id) FROM Jobwork j2 GROUP BY j2.jobworkNumber)")
 	List<Jobwork> findUniqueJobworksByJobworkNumber();
@@ -26,24 +27,31 @@ public interface JobworkRepository extends JpaRepository<Jobwork, Long>, JpaSpec
 
 	@Query(value = "SELECT COUNT(*) FROM jobworks jw WHERE jw.employee_id = :employeeId AND jw.ended_at <> NULL", nativeQuery = true)
 	Long findActiveJobworkCount(Long employeeId);
-	
+
 	@Query(value = "SELECT COALESCE(SUM(quantity), 0) FROM jobworks jw WHERE jw.employee_id = :employeeId AND jw.ended_at IS NULL", nativeQuery = true)
 	Long findLifetimePiecesHandled(Long employeeId);
-	
-	Page<Jobwork> findByJobworkNumberContainingIgnoreCase(
-            String jobworkNumber,
-            Pageable pageable
-    );
-	
+
+	Page<Jobwork> findByJobworkNumberContainingIgnoreCase(String jobworkNumber, Pageable pageable);
+
 	List<Jobwork> findByBatchSerialCode(String serialCode);
-	
-	List<Jobwork> findByBatchSerialCodeAndJobworkStatusIn(
-	        String serialCode,
-	        List<JobworkStatus> jobworkStatuses
-	);
-	
-	@Query(value = "SELECT SUM(jwi.quantity) FROM jobworks jw, jobwork_items jwi WHERE jw.jobwork_number = :jobworkNumber "
+
+	List<Jobwork> findByBatchSerialCodeAndJobworkStatusIn(String serialCode, List<JobworkStatus> jobworkStatuses);
+
+	@Query(value = "SELECT COALESCE(SUM(jwi.quantity), 0) FROM jobworks jw, jobwork_items jwi WHERE jw.jobwork_number = :jobworkNumber "
 			+ "AND jw.id = jwi.jobwork_id", nativeQuery = true)
 	Long findTotalQuantities(String jobworkNumber);
+
+	// to get jobworks for the batch by jobwork type
+	List<Jobwork> findByBatchSerialCodeAndJobworkType(String serialCode, JobworkType jobworkType);
+
+	@Query(value = "SELECT COALESCE(SUM(jwi.quantity), 0) FROM jobworks jw, jobwork_items jwi, batches b "
+			+ " WHERE jw.id = jwi.jobwork_id AND jw.batch_id = b.id AND b.serial_code = :serialCode and jw.jobwork_type = :jobworkType", nativeQuery = true)
+	Long getAssignedQuantities(String serialCode, String jobworkType);
+
+	@Query(value = "SELECT COALESCE(SUM(jwi.quantity), 0) FROM jobworks jw, jobwork_items jwi, batches b, items i "
+			+ " WHERE jw.id = jwi.jobwork_id AND jw.batch_id = b.id AND b.serial_code = :serialCode and jw.jobwork_type = :jobworkType and jwi.item_id = i.id and i.name = :itemName", nativeQuery = true)
+	Long getAssignedQuantities(String serialCode, String jobworkType, String itemName);
+
+	List<Jobwork> findByBatch(Batch batch);
 
 }

@@ -13,6 +13,10 @@ public interface BatchItemRepository extends JpaRepository<BatchItem, Long> {
     List<BatchItem> findByBatchId(Long batchId);
     
     Optional<BatchItem> findByBatchIdAndItem(Long batchId, Item item);
+    
+    Optional<BatchItem> findByBatchIdAndItemName(Long batchId, String itemName);
+    
+    Optional<BatchItem> findByBatchSerialCodeAndItemName(String serialCode, String itemName);
 
     List<BatchItem> findByBatchSerialCode(String batchSerial);
 }

@@ -12,11 +12,14 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Table(name = "users")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 public class User extends BaseAuditable {
 	
@@ -29,9 +32,6 @@ public class User extends BaseAuditable {
 	
 	@Column(length = 200)
 	private String lastName;
-	
-	@Column(length = 200, unique = true)
-	private String name;
 
 	@Column(length = 200, nullable = false, unique = true)
 	private String username;
@@ -39,8 +39,8 @@ public class User extends BaseAuditable {
 	@Column(nullable = false)
 	private String password;
 	
-	@ColumnDefault("true")
-	private Boolean isActive;
+	@Column(nullable = false)
+	private Boolean isActive = true;
 	
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "role_id")

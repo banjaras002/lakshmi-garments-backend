@@ -76,11 +76,11 @@ public class BatchController {
 		return new ResponseEntity<>(batchSerialDTOs, HttpStatus.OK);
 	}
 	
-		// gets the possible workflows next for a batch
-	@GetMapping("/jobwork-types/{serialCode}")
+	// gets the possible jobwork types for a batch
+	@GetMapping("/{serialCode}/jobwork-types")
 	public ResponseEntity<List<JobworkType>> getJobworkTypes(@PathVariable String serialCode) {
-		LOGGER.info("Received request to fetch the allowed transitions for the batch");
-		List<JobworkType> allowedJobworkTypes = batchService.getJobworkTypes(serialCode);
+		LOGGER.info("Received request to fetch the allowed jobwork types for the batch");
+		List<JobworkType> allowedJobworkTypes = batchService.getAllowedJobworkTypes(serialCode);
 		return new ResponseEntity<>(allowedJobworkTypes, HttpStatus.OK);
 	}
 
@@ -100,13 +100,27 @@ public class BatchController {
 		return new ResponseEntity<>(HttpStatus.OK);
 	}
 	
-	@GetMapping("/{serialCode}/{jobworkType}/availableQuantity")
+	@GetMapping("/{serialCode}/{jobworkType}/available-quantity")
 	public ResponseEntity<Long> getAvailableQuantity(@PathVariable String serialCode,
 			@PathVariable String jobworkType) {
 		Long availableQuantity = batchService.getAvailableQuantities(serialCode, jobworkType);
 		return new ResponseEntity<>(availableQuantity, HttpStatus.OK);
 	}
 	
-	
+	//get the quantity available for cutting for a batch
+	@GetMapping("/{serialCode}/cutting/available-quantity")
+	public ResponseEntity<Long> getAvailableQuantityForCutting(@PathVariable String serialCode) {
+		LOGGER.info("Received request for available quantities for cutting work for batch {}", serialCode);
+	    Long availableQuantity = batchService.getAvailableQuantitiesForCutting(serialCode);
+	    return ResponseEntity.ok(availableQuantity);
+	}
+
+	// to get the available batches for assigning jobwork
+	@GetMapping("/available-for-jobwork")
+	public ResponseEntity<List<String>> getBatchesAvailableForJobwork() {
+		LOGGER.info("Received request for available batches for jobwork");
+	    List<String> batchSerialCodes = batchService.getBatchSerialCodesForJobwork();
+	    return ResponseEntity.ok(batchSerialCodes);
+	}
 	
 }

@@ -14,6 +14,11 @@ public class GlobalExceptionHandler {
     public ResponseEntity<String> handleCategoryNotFound(CategoryNotFoundException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
     }
+    
+    @ExceptionHandler(InsufficientBatchQuantityException.class)
+    public ResponseEntity<String> handleInsufficientBatchQuantity(InsufficientBatchQuantityException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
+    }
 
     // jobwork not found exception
     @ExceptionHandler(JobworkNotFoundException.class)

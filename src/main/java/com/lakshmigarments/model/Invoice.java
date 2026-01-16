@@ -17,11 +17,14 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Table(name = "invoices", uniqueConstraints = { @UniqueConstraint(columnNames = { "invoice_number", "supplier_id" }) })
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 public class Invoice extends BaseAuditable {
 

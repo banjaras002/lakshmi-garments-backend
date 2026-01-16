@@ -1,7 +1,7 @@
 package com.lakshmigarments.service.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.lakshmigarments.dto.JobworkReceiptDTO;
+import com.lakshmigarments.dto.request.CreateJobworkReceiptRequest;
 import com.lakshmigarments.model.WorkflowRequest;
 import org.springframework.stereotype.Component;
 
@@ -23,7 +23,7 @@ public class WorkflowPayloadMapper {
             switch (request.getWorkflowRequestType()) {
                 case JOBWORK_RECEIPT:
                     return objectMapper.readValue(
-                        request.getPayload(), JobworkReceiptDTO.class);
+                        request.getPayload(), CreateJobworkReceiptRequest.class);
 
                 default:
                     throw new IllegalStateException(

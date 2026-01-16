@@ -2,10 +2,10 @@ package com.lakshmigarments.service;
 
 import java.util.List;
 
-import com.lakshmigarments.dto.ItemResponseDTO;
+import com.lakshmigarments.dto.response.BatchItemResponse;
 
 public interface BatchItemService {
 
-    List<ItemResponseDTO> getItemsByBatchSerial(String serialCode);
+    List<BatchItemResponse> getBatchItemsByBatchSerial(String serialCode, String jobworkType);
     
 }

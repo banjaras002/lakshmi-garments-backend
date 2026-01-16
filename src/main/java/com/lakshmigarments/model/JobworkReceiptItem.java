@@ -29,14 +29,17 @@ public class JobworkReceiptItem {
 	@ManyToOne
 	private Item item;
 	
-	private Long receivedQuantity;
+	// usable items returned
+	private Long acceptedQuantity;
 	
 	private Long damagedQuantity;
 	
-	private Long purchaseQuantity;
+	// sales done to the employee
+	private Long salesQuantity;
 	
-	private Double purchaseRate;
+	private Double salesPrice;
 	
+	// wage payable per item
 	private Double wagePerItem;
 	
 }

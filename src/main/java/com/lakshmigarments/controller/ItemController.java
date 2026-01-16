@@ -1,7 +1,7 @@
 package com.lakshmigarments.controller;
 
 import com.lakshmigarments.dto.ItemRequestDTO;
-import com.lakshmigarments.dto.ItemResponseDTO;
+import com.lakshmigarments.dto.response.BatchItemResponse;
 import com.lakshmigarments.service.ItemService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -24,25 +24,25 @@ public class ItemController {
     private final ItemService itemService;
 
     @GetMapping
-    public ResponseEntity<List<ItemResponseDTO>> getAllItems(@RequestParam(required = false) String search){
+    public ResponseEntity<List<BatchItemResponse>> getAllItems(@RequestParam(required = false) String search){
         LOGGER.info("Received request to get all items");
-        List<ItemResponseDTO> itemResponseDTO = itemService.getAllItems(search);
+        List<BatchItemResponse> itemResponseDTO = itemService.getAllItems(search);
         LOGGER.info("Items retrieved successfully");
         return ResponseEntity.status(HttpStatus.OK).body(itemResponseDTO);
     }
 
     @PostMapping
-    public ResponseEntity<ItemResponseDTO> createItem(@Valid @RequestBody ItemRequestDTO itemRequestDTO){
+    public ResponseEntity<BatchItemResponse> createItem(@Valid @RequestBody ItemRequestDTO itemRequestDTO){
         LOGGER.info("Received request to create item: {}", itemRequestDTO.getName());
-        ItemResponseDTO itemResponseDTO = itemService.createItem(itemRequestDTO);
+        BatchItemResponse itemResponseDTO = itemService.createItem(itemRequestDTO);
         LOGGER.info("Item created successfully with ID: {}", itemResponseDTO.getId());
         return ResponseEntity.status(HttpStatus.CREATED).body(itemResponseDTO);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ItemResponseDTO> updateItem(@PathVariable Long id, @Valid @RequestBody ItemRequestDTO itemRequestDTO){
+    public ResponseEntity<BatchItemResponse> updateItem(@PathVariable Long id, @Valid @RequestBody ItemRequestDTO itemRequestDTO){
         LOGGER.info("Received request to update item with ID: {}", id);
-        ItemResponseDTO itemResponseDTO = itemService.updateItem(id, itemRequestDTO);
+        BatchItemResponse itemResponseDTO = itemService.updateItem(id, itemRequestDTO);
         LOGGER.info("Item updated successfully with ID: {}", itemResponseDTO.getId());
         return ResponseEntity.status(HttpStatus.OK).body(itemResponseDTO);
     }

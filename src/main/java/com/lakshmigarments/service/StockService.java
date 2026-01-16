@@ -122,7 +122,7 @@ public class StockService {
 			List<Bale> bales = new ArrayList<>();
 			
 			LorryReceipt lorryReceipt = new LorryReceipt();
-			lorryReceipt.setLRNumber(LRNumber);
+			lorryReceipt.setLrNumber(LRNumber);
 			
 			for (CreateBaleDTO baleDTO : baleDTOs) {
 				String baleNumber = baleDTO.getBaleNumber();

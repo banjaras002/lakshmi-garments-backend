@@ -1,8 +1,10 @@
-package com.lakshmigarments.dto;
+package com.lakshmigarments.dto.response;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
+import com.lakshmigarments.dto.JobworkItemDTO;
+import com.lakshmigarments.dto.request.CreateJobworkReceiptItemRequest;
 import com.lakshmigarments.model.JobworkItem;
 import com.lakshmigarments.model.JobworkItemStatus;
 import com.lakshmigarments.model.JobworkReceiptItem;
@@ -35,7 +37,7 @@ public class JobworkDetailDTO {
     
     private List<JobworkItemDTO> jobworkItems;
     
-    private List<JobworkReceiptItemDTO> jobworkReceiptItems;
+    private List<CreateJobworkReceiptItemRequest> jobworkReceiptItems;
 
 
 }

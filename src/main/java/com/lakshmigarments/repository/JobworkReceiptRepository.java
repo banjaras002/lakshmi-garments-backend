@@ -32,29 +32,26 @@ public interface JobworkReceiptRepository extends JpaRepository<JobworkReceipt, 
 	
 	@Query("""
 		    SELECT new com.lakshmigarments.dto.PaydayDTO(
-		        e.name,
 		        COUNT(DISTINCT r.id),
-		        COALESCE(SUM(i.receivedQuantity), 0),
+		        COALESCE(SUM(i.acceptedQuantity), 0),
 		        COALESCE(SUM(i.damagedQuantity), 0),
-		        COALESCE(SUM(i.purchaseQuantity), 0),
-		        COALESCE(SUM(i.receivedQuantity * i.wagePerItem), 0)
+		        COALESCE(SUM(i.salesQuantity), 0),
+		        COALESCE(SUM(i.acceptedQuantity * i.wagePerItem), 0)
 		    )
 		    FROM JobworkReceipt r
-		    JOIN r.completedBy e
 		    JOIN r.jobworkReceiptItems i
-		    WHERE (:employeeName IS NULL 
-		           OR LOWER(e.name) LIKE LOWER(CONCAT('%', :employeeName, '%')))
-		      AND (:fromDate IS NULL OR r.createdAt >= :fromDate)
+		    WHERE  (:fromDate IS NULL OR r.createdAt >= :fromDate)
 		      AND (:toDate IS NULL OR r.createdAt <= :toDate)
-		    GROUP BY e.id, e.name
-		    ORDER BY e.name ASC
 		""")
 		Page<PaydayDTO> getPaydaySummary(
-		    @Param("employeeName") String employeeName,
 		    @Param("fromDate") LocalDateTime fromDate,
 		    @Param("toDate") LocalDateTime toDate,
 		    Pageable pageable
 		);
-
+	
+	// get the accepted quantity for the jobwork, item, jobwork type
+	@Query(value = "SELECT COALESCE(SUM(i.acceptedQuantity), 0) FROM ", nativeQuery = true)
+	Long getAcceptedQuantityAndPermanantDamagesForJobwork();
+	
 	
 }

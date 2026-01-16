@@ -19,9 +19,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.lakshmigarments.dto.EmployeeRequestDTO;
-import com.lakshmigarments.dto.JobworkDetailDTO;
 import com.lakshmigarments.dto.JobworkRequestDTO;
 import com.lakshmigarments.dto.JobworkResponseDTO;
+import com.lakshmigarments.dto.request.CreateJobworkRequest;
+import com.lakshmigarments.dto.request.ReassignJobworkRequest;
+import com.lakshmigarments.dto.response.JobworkDetailDTO;
+import com.lakshmigarments.dto.response.JobworkResponse;
 import com.lakshmigarments.model.Employee;
 import com.lakshmigarments.model.Jobwork;
 import com.lakshmigarments.service.JobworkService;
@@ -46,16 +49,14 @@ public class JobworkController {
                 HttpStatus.OK);
     }
 
+    // create a new jobwork
     @PostMapping
-    public ResponseEntity<Jobwork> createJobwork(@RequestBody JobworkRequestDTO jobworkRequestDTO) {
-        LOGGER.info("Received jobwork request for batch: {} and employee: {}", jobworkRequestDTO.getBatchSerialCode(),
-                jobworkRequestDTO.getEmployeeId());
-        Jobwork createdJobwork = jobworkService.createJobwork(jobworkRequestDTO);
-        LOGGER.info("Jobwork created successfully for batch: {} and employee: {}", jobworkRequestDTO.getBatchSerialCode(),
-                jobworkRequestDTO.getEmployeeId());
-        if (createdJobwork == null) {
-            return new ResponseEntity<>(createdJobwork, HttpStatus.BAD_REQUEST);
-        }
+    public ResponseEntity<JobworkResponse> createJobwork(@RequestBody CreateJobworkRequest jobworkRequest) {
+        LOGGER.info("Received jobwork request for batch: {} and employee: {}", jobworkRequest.getBatchSerialCode(),
+        		jobworkRequest.getAssignedTo());
+        JobworkResponse createdJobwork = jobworkService.createJobwork(jobworkRequest);
+        LOGGER.info("Jobwork created successfully for batch: {} and employee: {}", jobworkRequest.getBatchSerialCode(),
+        		jobworkRequest.getAssignedTo());
         return new ResponseEntity<>(createdJobwork, HttpStatus.CREATED);
     }
 
@@ -64,8 +65,10 @@ public class JobworkController {
         return new ResponseEntity<>(jobworkService.getJobworkNumbers(search), HttpStatus.OK);
     }
 
+    // GETTNG a quick detail of the jobwork for viewing during in pass acceptance
     @GetMapping("/jobwork-numbers/{jobworkNumber}")
     public ResponseEntity<JobworkDetailDTO> getJobworkDetail(@PathVariable String jobworkNumber) {
+    	LOGGER.info("Received request to get jobwork details of {}", jobworkNumber);
         return new ResponseEntity<>(jobworkService.getJobworkDetail(jobworkNumber), HttpStatus.OK);
     }
 
@@ -74,11 +77,28 @@ public class JobworkController {
         return new ResponseEntity<>(jobworkService.getNextJobworkNumber(), HttpStatus.OK);
     }
     
-    @PostMapping("/reassign/{jobworkNumber}")
+    @PostMapping("/{jobworkNumber}/reassign")
     public ResponseEntity<Jobwork> reAssignJobwork(@PathVariable String jobworkNumber, 
-    		@RequestBody Long employeeId) {
+    		@RequestBody ReassignJobworkRequest reassignRequest) {
+    	LOGGER.info("Received request to reassign jobwork {} to employee {}", jobworkNumber, reassignRequest.getEmployeeName());
         return new ResponseEntity<>(jobworkService.reAssignJobwork(jobworkNumber, 
-        		employeeId), HttpStatus.OK);
+        		reassignRequest.getEmployeeName()), HttpStatus.OK);
+    }
+    
+    @PostMapping("/{jobworkNumber}/close")
+    public ResponseEntity<JobworkResponse> closeJobwork(@PathVariable String jobworkNumber) {
+    	LOGGER.info("Received request to close jobwork {}", jobworkNumber);
+    	JobworkResponse jobworkResponse = jobworkService.closeJobwork(jobworkNumber);
+    	LOGGER.info("Closed jobwork {}", jobworkNumber);
+    	return new ResponseEntity<>(jobworkResponse, HttpStatus.OK);
+    }
+    
+    @PostMapping("/{jobworkNumber}/reopen")
+    public ResponseEntity<JobworkResponse> reopenJobwork(@PathVariable String jobworkNumber) {
+    	LOGGER.info("Received request to reopen jobwork {}", jobworkNumber);
+    	JobworkResponse jobworkResponse = jobworkService.reopenJobwork(jobworkNumber);
+    	LOGGER.info("Reopened jobwork {}", jobworkNumber);
+    	return new ResponseEntity<>(jobworkResponse, HttpStatus.OK);
     }
     
 //    @GetMapping("/unfinished")

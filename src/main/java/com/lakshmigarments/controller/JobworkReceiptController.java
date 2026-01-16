@@ -10,12 +10,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.lakshmigarments.dto.JobworkReceiptDTO;
 import com.lakshmigarments.dto.JobworkRequestDTO;
+import com.lakshmigarments.dto.request.CreateJobworkReceiptRequest;
 import com.lakshmigarments.model.Jobwork;
 import com.lakshmigarments.service.JobworkReceiptService;
 import com.lakshmigarments.service.JobworkService;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -29,13 +30,10 @@ public class JobworkReceiptController {
 	private final JobworkReceiptService jobworkReceiptService;
 
 	@PostMapping
-    public ResponseEntity<Void> createJobworkReceipt(@RequestBody JobworkReceiptDTO jobworkReceiptDTO) {
-        LOGGER.info("Received jobwork receipt request for jobwork: {}", jobworkReceiptDTO.getJobworkNumber());
-        jobworkReceiptService.createJobworkReceipt(jobworkReceiptDTO);
-        LOGGER.info("Jobwork created successfully for jobwork: {}", jobworkReceiptDTO.getJobworkNumber());
-//        if (createdJobwork == null) {
-//            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-//        }
+    public ResponseEntity<Void> createJobworkReceipt(@RequestBody @Valid CreateJobworkReceiptRequest receiptRequest) {
+        LOGGER.info("Received jobwork receipt request for jobwork: {}", receiptRequest.getJobworkNumber());
+        jobworkReceiptService.createJobworkReceipt(receiptRequest);
+        LOGGER.info("Jobwork receipt created successfully for jobwork: {}", receiptRequest.getJobworkNumber());
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 	

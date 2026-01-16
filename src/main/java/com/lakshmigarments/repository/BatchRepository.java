@@ -43,6 +43,7 @@ public interface BatchRepository extends JpaRepository<Batch, Long>, JpaSpecific
 			""", nativeQuery = true)
 	List<Batch> findAllExceptPackagedWithoutRepairableDamages();
 	
-	
+	@Query(value = "SELECT b.serial_code FROM batches b WHERE b.batch_status NOT IN ('DISCARDED','CLOSED')", nativeQuery = true)
+	List<String> findAllBatchSerialCodesForJobwork();
 
 }

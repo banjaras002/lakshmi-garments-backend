@@ -27,7 +27,7 @@ public class LorryReceiptServiceImpl implements LorryReceiptService {
 		});
 
 		if (lorryReceiptUpdateDTO.getLrNumber() != null) {
-			lorryReceipt.setLRNumber(lorryReceiptUpdateDTO.getLrNumber());
+			lorryReceipt.setLrNumber(lorryReceiptUpdateDTO.getLrNumber());
 		}
 		lorryReceiptRepository.save(lorryReceipt);
 	}

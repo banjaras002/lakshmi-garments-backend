@@ -1,5 +1,7 @@
 package com.lakshmigarments.dto;
 
+import com.lakshmigarments.dto.request.CreateDamageRequest;
+
 import lombok.Getter;
 import lombok.Setter;
 
@@ -8,7 +10,7 @@ import lombok.Setter;
 public class JobworkTimelineDTO {
 	
 	private JobworkResponseDTO jobworkDetail;
-	private DamageDTO damages;
+	private CreateDamageRequest damages;
 	private Long salesQuantity;
 	private Long salesCost;
 

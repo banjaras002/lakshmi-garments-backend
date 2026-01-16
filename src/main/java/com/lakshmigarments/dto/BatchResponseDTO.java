@@ -3,6 +3,8 @@ package com.lakshmigarments.dto;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import com.lakshmigarments.dto.response.BatchItemResponse;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -44,6 +46,6 @@ public class BatchResponseDTO {
 	
 	private List<BatchSubCategoryResponseDTO> subCategories;
 	
-	private List<ItemResponseDTO> items;
+	private List<BatchItemResponse> items;
 
 }

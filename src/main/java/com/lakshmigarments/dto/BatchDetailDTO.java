@@ -1,5 +1,8 @@
 package com.lakshmigarments.dto;
 
+import com.lakshmigarments.dto.request.CreateDamageRequest;
+import com.lakshmigarments.dto.response.BatchItemResponse;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
@@ -23,9 +26,9 @@ public class BatchDetailDTO {
 	};
 
 	private String batchSerialCode;
-	private DamageDTO damages;
+	private CreateDamageRequest damages;
 	private SubCategoryQuantityDTO availableQuantities;
 	private SubCategoryCountDTO quantitiesWithEmployees;
-	private ItemResponseDTO itemsWithEmployees;
+	private BatchItemResponse itemsWithEmployees;
 	
 }
