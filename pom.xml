@@ -28,7 +28,7 @@
     </scm>
 
     <properties>
-        <java.version>17</java.version> <!-- Ensure the Java version matches your JDK -->
+        <java.version>21</java.version>
     </properties>
 
     <dependencies>
@@ -133,13 +133,13 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <!-- Ensure you're using a version that supports Java 21 -->
                 <configuration>
-                    <source>17</source>  <!-- Use Java 21 -->
-                    <target>17</target>  <!-- Use Java 21 -->
+                    <source>21</source> 
+                    <target>21</target>
                     <annotationProcessorPaths>
                         <path>
                             <groupId>org.projectlombok</groupId>
                             <artifactId>lombok</artifactId>
-                            <version>1.18.34</version> <!-- Make sure this matches the version of Lombok you use -->
+                            <version>1.18.34</version>
                         </path>
                     </annotationProcessorPaths>
                 </configuration>
