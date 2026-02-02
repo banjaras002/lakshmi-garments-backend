@@ -7,14 +7,13 @@ import java.util.List;
 
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import com.lakshmigarments.model.MaterialInventoryLedger;
 import com.lakshmigarments.repository.MaterialLedgerRepository;
 import com.lakshmigarments.service.ExcelFileGeneratorService;
-import com.lakshmigarments.utility.DateUtil;
 
 import lombok.RequiredArgsConstructor;
 
@@ -30,7 +29,8 @@ public class ExcelFileGeneratorServiceImpl implements ExcelFileGeneratorService 
 		
 		List<MaterialInventoryLedger> inventoryLedgers = ledgerRepository.findAll();
 		
-		XSSFWorkbook workbook = new XSSFWorkbook();
+		// Use SXSSFWorkbook for streaming to avoid OOM
+		SXSSFWorkbook workbook = new SXSSFWorkbook(100); // keep 100 rows in memory, exceeding rows will be flushed to disk
         Sheet sheet = workbook.createSheet("Invoices");
 
         // Header row
@@ -68,6 +68,7 @@ public class ExcelFileGeneratorServiceImpl implements ExcelFileGeneratorService 
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         try {
 			workbook.write(out);
+			workbook.dispose(); // dispose of temporary files backing this workbook on disk
 			workbook.close();
 		} catch (IOException e) {
 			LOGGER.error("Error writing to file");
@@ -80,3 +81,4 @@ public class ExcelFileGeneratorServiceImpl implements ExcelFileGeneratorService 
 	}
 
 }
+
