@@ -1,4 +1,4 @@
-package com.lakshmigarments.dto;
+package com.lakshmigarments.dto.response;
 
 import java.time.LocalDateTime;
 
@@ -11,7 +11,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class WorkflowResponseDTO {
+public class WorkflowResponse {
 	private Long id;
 	private WorkflowRequestType requestType;
 	private WorkflowRequestStatus requestStatus;

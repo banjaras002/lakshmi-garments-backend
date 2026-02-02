@@ -123,4 +123,11 @@ public class BatchController {
 	    return ResponseEntity.ok(batchSerialCodes);
 	}
 	
+	@GetMapping("/serial-codes")
+	public ResponseEntity<List<String>> getAllBatchSerialCode() {
+		LOGGER.info("Received request to get all the batch serial code");
+	    List<String> batchSerialCodes = batchService.getAllBatchSerialCode();
+	    return ResponseEntity.ok(batchSerialCodes);
+	}
+	
 }

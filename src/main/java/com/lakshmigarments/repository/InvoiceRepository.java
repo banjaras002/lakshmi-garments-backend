@@ -52,5 +52,7 @@ public interface InvoiceRepository extends JpaRepository<Invoice, Long>, JpaSpec
 	
 	boolean existsByInvoiceNumberAndSupplierNameAndIdNot(String invNo, String supplierName, Long id);
 	
+	boolean existsByInvoiceNumberAndSupplierId(String invNo, Long supplierId);
+	
 	
 }

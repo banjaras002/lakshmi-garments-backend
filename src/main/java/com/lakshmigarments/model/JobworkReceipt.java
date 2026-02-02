@@ -35,9 +35,5 @@ public class JobworkReceipt extends BaseAuditable {
 	@OneToMany(mappedBy = "jobworkReceipt", fetch = FetchType.LAZY, 
 			cascade = CascadeType.ALL, orphanRemoval = true)
     private List<JobworkReceiptItem> jobworkReceiptItems;
-	
-	@OneToMany(mappedBy = "jobworkReceipt", fetch = FetchType.LAZY, 
-			cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Damage> damages;
 
 }

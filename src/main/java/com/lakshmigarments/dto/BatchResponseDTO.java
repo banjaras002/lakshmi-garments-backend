@@ -7,7 +7,9 @@ import com.lakshmigarments.dto.response.BatchItemResponse;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Data
 @NoArgsConstructor
@@ -23,6 +25,14 @@ public class BatchResponseDTO {
 		
 		private String subCategoryName;
 		
+		private Long quantity;
+	}
+	
+	@Getter
+	@Setter
+	public static class BatchItemResponse {
+		private Long id;
+		private String itemName;
 		private Long quantity;
 	}
 	

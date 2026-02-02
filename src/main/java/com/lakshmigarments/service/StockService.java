@@ -16,6 +16,7 @@ import com.lakshmigarments.dto.CreateLorryReceiptDTO;
 import com.lakshmigarments.dto.CreateStockDTO;
 import com.lakshmigarments.dto.StockDTO;
 import com.lakshmigarments.exception.CategoryNotFoundException;
+import com.lakshmigarments.exception.DuplicateInvoiceException;
 import com.lakshmigarments.exception.SubCategoryNotFoundException;
 import com.lakshmigarments.exception.SupplierNotFoundException;
 import com.lakshmigarments.exception.TransportNotFoundException;
@@ -89,6 +90,12 @@ public class StockService {
 		Long supplierID = createStockDTO.getSupplierID();
 		Long transportID = createStockDTO.getTransportID();
 		List<CreateLorryReceiptDTO> lorryReceiptDTOs = createStockDTO.getLorryReceipts();
+		
+		boolean isDuplicate = invoiceRepository.existsByInvoiceNumberAndSupplierId(
+				createStockDTO.getInvoiceNumber(), createStockDTO.getSupplierID());
+		if (isDuplicate) {
+			throw new DuplicateInvoiceException("Invoice already exists with same invoice number and supplier");
+		}
 
 		Supplier supplier = supplierRepository.findById(supplierID).orElseThrow(() -> {
 			LOGGER.error("Supplier with ID {} not found", supplierID);

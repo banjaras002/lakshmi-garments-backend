@@ -22,7 +22,7 @@ import lombok.NoArgsConstructor;
 @Table(name = "workflow_requests")
 @Data
 @NoArgsConstructor
-public class WorkflowRequest {
+public class WorkflowRequest extends BaseAuditable {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -39,18 +39,6 @@ public class WorkflowRequest {
 	@Lob
 	@Column(columnDefinition = "TEXT")
 	private String payload;
-	
-	@ManyToOne
-	private User requestedBy;
-	
-	@ManyToOne
-	private User approvedBy;
-	
-	@CreationTimestamp
-	private LocalDateTime requestedAt;
-	
-	@UpdateTimestamp
-	private LocalDateTime approvedAt;
 	
 	private String systemComments;
 	

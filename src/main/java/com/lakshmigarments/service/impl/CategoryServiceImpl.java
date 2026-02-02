@@ -8,9 +8,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import com.lakshmigarments.dto.CategoryRequestDTO;
-import com.lakshmigarments.dto.CategoryResponseDTO;
+import com.lakshmigarments.dto.request.CategoryRequest;
+import com.lakshmigarments.dto.response.CategoryResponse;
 import com.lakshmigarments.exception.CategoryNotFoundException;
 import com.lakshmigarments.exception.DuplicateCategoryException;
 import com.lakshmigarments.model.Category;
@@ -18,71 +19,96 @@ import com.lakshmigarments.repository.CategoryRepository;
 import com.lakshmigarments.repository.specification.CategorySpecification;
 import com.lakshmigarments.service.CategoryService;
 
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
 public class CategoryServiceImpl implements CategoryService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(CategoryServiceImpl.class);
-    private final CategoryRepository categoryRepository;
-    private final ModelMapper modelMapper;
+	private static final Logger LOGGER = LoggerFactory.getLogger(CategoryServiceImpl.class);
 
-    @Override
-    public CategoryResponseDTO createCategory(CategoryRequestDTO categoryRequestDTO) {
+	private final CategoryRepository categoryRepository;
+	private final ModelMapper modelMapper;
 
-        String categoryName = categoryRequestDTO.getName().trim();
-        String categoryCode = categoryRequestDTO.getCode().trim();
+	@Override
+	@Transactional(readOnly = true)
+	public List<CategoryResponse> getAllCategories(String search) {
+		LOGGER.debug("Fetching all categories with search criteria: {}", search);
+		Specification<Category> spec = CategorySpecification.filterByName(search);
 
-        if (categoryRepository.existsByNameIgnoreCase(categoryName)
-                || categoryRepository.existsByCodeIgnoreCase(categoryCode)) {
-            LOGGER.error("Category already exists with name {} or code {}", categoryName, categoryCode);
-            throw new DuplicateCategoryException(
-                    "Category already exists with name " + categoryName + " or code " + categoryCode);
-        }
+		List<Category> categories = categoryRepository.findAll(spec);
+		LOGGER.debug("Found {} category(s) matching filter", categories.size());
+		return categories.stream()
+				.map(category -> modelMapper.map(category, CategoryResponse.class))
+				.collect(Collectors.toList());
+	}
 
-        Category category = new Category();
-        category.setName(categoryName);
-        category.setCode(categoryCode);
+	@Override
+	@Transactional
+	public CategoryResponse createCategory(CategoryRequest categoryRequest) {
+		LOGGER.debug("Creating category: {}", categoryRequest.getName());
 
-        Category savedCategory = categoryRepository.save(category);
-        LOGGER.debug("Category created with name {}", savedCategory.getName());
-        return modelMapper.map(savedCategory, CategoryResponseDTO.class);
-    }
+		String categoryName = categoryRequest.getName().trim();
+		String categoryCode = categoryRequest.getCode().trim();
 
-    @Override
-    public CategoryResponseDTO updateCategory(Long id, CategoryRequestDTO categoryRequestDTO) {
+		validateCategoryUniqueness(categoryName, categoryCode, null);
 
-        String categoryName = categoryRequestDTO.getName().trim();
-        String categoryCode = categoryRequestDTO.getCode().trim();
+		Category category = new Category();
+		category.setName(categoryName);
+		category.setCode(categoryCode);
 
-        Category category = categoryRepository.findById(id)
-                .orElseThrow(() -> {
-                    LOGGER.error("Category not found with ID: {}", id);
-                    return new CategoryNotFoundException("Category not found with ID: " + id);
-                });
+		Category savedCategory = categoryRepository.save(category);
+		LOGGER.info("Category created successfully with ID: {}", savedCategory.getId());
+		return modelMapper.map(savedCategory, CategoryResponse.class);
+	}
 
-        if (categoryRepository.existsByNameIgnoreCaseAndIdNot(categoryName, id)
-                || categoryRepository.existsByCodeIgnoreCaseAndIdNot(categoryCode, id)) {
-            LOGGER.error("Category already exists with name {} or code {}", categoryName, categoryCode);
-            throw new DuplicateCategoryException(
-                    "Category already exists with name " + categoryName + " or code " + categoryCode);
-        }
+	@Override
+	@Transactional
+	public CategoryResponse updateCategory(Long id, CategoryRequest categoryRequest) {
+		LOGGER.debug("Updating category with ID: {} to {}", id, categoryRequest.getName());
+		
+		Category category = this.getCategoryOrThrow(id);
+		
+		String categoryName = categoryRequest.getName().trim();
+		String categoryCode = categoryRequest.getCode().trim();
 
-        category.setName(categoryName);
-        category.setCode(categoryCode);
-        Category updatedCategory = categoryRepository.save(category);
-        LOGGER.debug("Category updated with name {}", updatedCategory.getName());
-        return modelMapper.map(updatedCategory, CategoryResponseDTO.class);
-    }
+		validateCategoryUniqueness(categoryName, categoryCode, id);
 
-    @Override
-    public List<CategoryResponseDTO> getAllCategories(String search) {
-        Specification<Category> spec = CategorySpecification.filterByName(search);
-        List<Category> categories = categoryRepository.findAll(spec);
-        LOGGER.debug("Found {} category(s) matching filter", categories.size());
-        return categories.stream().map(category -> modelMapper.map(category, CategoryResponseDTO.class))
-                .collect(Collectors.toList());
-    }
+		category.setName(categoryName);
+		category.setCode(categoryCode);
+		
+		Category updatedCategory = categoryRepository.save(category);
+		LOGGER.info("Category updated successfully with ID: {}", updatedCategory.getId());
+		return modelMapper.map(updatedCategory, CategoryResponse.class);
+	}
+
+	private void validateCategoryUniqueness(String name, String code, Long id) {
+		if (id == null) {
+			if (categoryRepository.existsByNameIgnoreCase(name)) {
+				LOGGER.error("Category name already exists: {}", name);
+				throw new DuplicateCategoryException("Category already exists with name: " + name);
+			}
+			if (categoryRepository.existsByCodeIgnoreCase(code)) {
+				LOGGER.error("Category code already exists: {}", code);
+				throw new DuplicateCategoryException("Category already exists with code: " + code);
+			}
+		} else {
+			if (categoryRepository.existsByNameIgnoreCaseAndIdNot(name, id)) {
+				LOGGER.error("Category name already exists for another ID: {}", name);
+				throw new DuplicateCategoryException("Category already exists with name: " + name);
+			}
+			if (categoryRepository.existsByCodeIgnoreCaseAndIdNot(code, id)) {
+				LOGGER.error("Category code already exists for another ID: {}", code);
+				throw new DuplicateCategoryException("Category already exists with code: " + code);
+			}
+		}
+	}
+
+	private Category getCategoryOrThrow(Long id) {
+		return categoryRepository.findById(id).orElseThrow(() -> {
+			LOGGER.error("Category not found with ID: {}", id);
+			return new CategoryNotFoundException("Category not found with ID: " + id);
+		});
+	}
+
 }

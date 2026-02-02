@@ -1,5 +1,7 @@
 package com.lakshmigarments.service.impl;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.modelmapper.ModelMapper;
@@ -21,8 +23,9 @@ import com.lakshmigarments.configuration.ObjectMapperConfig;
 import com.lakshmigarments.context.UserContext;
 import com.lakshmigarments.context.UserInfo;
 import com.lakshmigarments.controller.UserController;
-import com.lakshmigarments.dto.WorkflowResponseDTO;
 import com.lakshmigarments.dto.request.CreateJobworkReceiptRequest;
+import com.lakshmigarments.dto.request.WorkflowRequestDTO;
+import com.lakshmigarments.dto.response.WorkflowResponse;
 import com.lakshmigarments.exception.JobworkNotFoundException;
 import com.lakshmigarments.exception.UserNotFoundException;
 import com.lakshmigarments.exception.WorkflowRequestNotFoundException;
@@ -30,7 +33,6 @@ import com.lakshmigarments.model.Jobwork;
 import com.lakshmigarments.model.JobworkStatus;
 import com.lakshmigarments.model.User;
 import com.lakshmigarments.model.WorkflowRequest;
-import com.lakshmigarments.model.WorkflowRequestDTO;
 import com.lakshmigarments.model.WorkflowRequestStatus;
 import com.lakshmigarments.model.WorkflowRequestType;
 import com.lakshmigarments.repository.JobworkRepository;
@@ -44,10 +46,7 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class WorkflowRequestServiceImpl implements WorkflowRequestService {
-
-    private final UserController userController;
-
-
+	
 	private static final Logger LOGGER = LoggerFactory.getLogger(WorkflowRequestServiceImpl.class);
 	private final WorkflowRequestRepository requestRepository;
 	private final ObjectMapper objectMapper;
@@ -73,13 +72,10 @@ public class WorkflowRequestServiceImpl implements WorkflowRequestService {
 		UserInfo userInfo = UserContext.get();
 		User user = userRepository.findById(Long.valueOf(1)).orElse(null);
 		
-		if (workflowRequestDTO.getRequestType() == WorkflowRequestType.JOBWORK_RECEIPT.toString()) {
+		if (workflowRequestDTO.getRequestType().equals(WorkflowRequestType.JOBWORK_RECEIPT.toString())) {
 			try {
 				JsonNode root = objectMapper.readTree(workflowRequestDTO.getPayload());
-				JsonNode firstItem = root.get(0);
-
-				String jobworkNumber = firstItem.get("jobworkNumber").asText();
-				System.out.println(jobworkNumber);
+				String jobworkNumber = root.get("jobworkNumber").asText();
 				Jobwork jobwork = jobworkRepository.findByJobworkNumber(jobworkNumber).orElse(null);
 				if (jobwork == null) {
 					throw new JobworkNotFoundException("No Jobwork found with ID " + jobworkNumber);
@@ -95,78 +91,105 @@ public class WorkflowRequestServiceImpl implements WorkflowRequestService {
 		WorkflowRequest workflowRequest = new WorkflowRequest();
 		workflowRequest.setPayload(workflowRequestDTO.getPayload());
 		workflowRequest.setRemarks(workflowRequestDTO.getRemarks());
-		workflowRequest.setRequestedBy(null);
 		workflowRequest.setSystemComments(workflowRequestDTO.getSystemComments());
 		workflowRequest.setWorkflowRequestType(WorkflowRequestType.valueOf(workflowRequestDTO.getRequestType()));
 		workflowRequest.setWorkflowRequestStatus(WorkflowRequestStatus.PENDING);
-		workflowRequest.setRequestedBy(user);
 		return requestRepository.save(workflowRequest);
 //		return null;
 	}
 
 	@Override
-	public Page<WorkflowResponseDTO> getAllWorkflowRequests(Integer pageNo, Integer pageSize, String sortBy, String sortDir,List<String> requestedByNames 
-			) {
-		
+	public Page<WorkflowResponse> getAllWorkflowRequests(Integer pageNo, Integer pageSize, String sortBy, String sortDir,
+			List<String> requestedByNames, List<WorkflowRequestType> requestTypes, List<WorkflowRequestStatus> statuses,
+			LocalDate startDate, LocalDate endDate) {
+
 		if (pageNo == null) {
 			pageNo = 0;
 		}
 		if (pageSize == null || pageSize == 0) {
 			pageSize = 10;
 		}
-		
-		Sort sort = sortDir.equals("asc") ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
-		
+
+		Sort sort = "asc".equalsIgnoreCase(sortDir) ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
+
 		Specification<WorkflowRequest> specification = Specification
-				.where(WorfklowRequestSpecification.filterByRequestedNames(requestedByNames));
+				.where(WorfklowRequestSpecification.filterByRequestedNames(requestedByNames))
+				.and(WorfklowRequestSpecification.filterByRequestType(requestTypes))
+				.and(WorfklowRequestSpecification.filterByStatus(statuses))
+				.and(WorfklowRequestSpecification.filterByDateRange(startDate, endDate));
 		Pageable pageable = PageRequest.of(pageNo, pageSize, sort);
-		
-		Page<WorkflowRequest> workflowRequestPage = requestRepository.findAll(specification,pageable);
-		
+
+		Page<WorkflowRequest> workflowRequestPage = requestRepository.findAll(specification, pageable);
+
 		return workflowRequestPage.map(this::convertToWorkflowResponseDTO);
 	}
 	
-	private WorkflowResponseDTO convertToWorkflowResponseDTO(WorkflowRequest entity) {
-	    return modelMapper.map(entity, WorkflowResponseDTO.class);
+	private WorkflowResponse convertToWorkflowResponseDTO(WorkflowRequest entity) {
+	    WorkflowResponse mappeResponseDTO = modelMapper.map(entity, WorkflowResponse.class);
+	    mappeResponseDTO.setRequestType(entity.getWorkflowRequestType());
+	    mappeResponseDTO.setRequestStatus(entity.getWorkflowRequestStatus());
+	    mappeResponseDTO.setPayload(this.parseJson(entity.getPayload()));
+	    mappeResponseDTO.setRequestedBy(entity.getCreatedBy());
+	    mappeResponseDTO.setRequestedAt(entity.getCreatedAt());
+	    return mappeResponseDTO;
 	}
 
 	@Override
 	public WorkflowRequest updateWorkflowRequest(Long id, WorkflowRequestDTO workflowRequestDTO) {
 		
-		UserInfo userInfo = UserContext.get();
-		Long userId = Long.valueOf(userInfo.getUserId());
-		User user = userRepository.findById(userId).orElseThrow(() -> {
-			LOGGER.error("User with ID {} not found", userId);
-			return new UserNotFoundException("User not found with ID " + userId);
-		});
+//		UserInfo userInfo = UserContext.get();
+//		Long userId = Long.valueOf(userInfo.getUserId());
+//		User user = userRepository.findById(userId).orElseThrow(() -> {
+//			LOGGER.error("User with ID {} not found", userId);
+//			return new UserNotFoundException("User not found with ID " + userId);
+//		});
 		
 		WorkflowRequest workflowRequest = requestRepository.findById(id).orElseThrow(() -> {
 			LOGGER.error("Workflow Request with ID {} not found", id);
 			return new WorkflowRequestNotFoundException("Workflow Request not found with ID " + id);
 		});
 
-		if (workflowRequestDTO.getRequestStatus() != null) {
-			workflowRequest.setWorkflowRequestStatus(WorkflowRequestStatus.valueOf(
-					workflowRequestDTO.getRequestStatus()));
+		switch (workflowRequestDTO.getRequestStatus()) {
+		case "APPROVED":
+			workflowRequest.setWorkflowRequestStatus(WorkflowRequestStatus.APPROVED);
+			break;
+		case "REJECTED":
+			// need to extract the payload and set batch jobwork status to IN_PROGRESS
+			try {
+				JsonNode root = objectMapper.readTree(workflowRequest.getPayload());
+				String jobworkNumber = root.get("jobworkNumber").asText();
+				Jobwork jobwork = jobworkRepository.findByJobworkNumber(jobworkNumber).orElse(null);
+				if (jobwork != null) {
+					jobwork.setJobworkStatus(JobworkStatus.IN_PROGRESS);
+					jobworkRepository.save(jobwork);
+				}
+			} catch (JsonProcessingException e) {
+				LOGGER.error("Error processing JSON payload for workflow request with ID {}", id);
+				e.printStackTrace();
+			}
+			workflowRequest.setWorkflowRequestStatus(WorkflowRequestStatus.REJECTED);
+			break;
+		default:
+			workflowRequest.setWorkflowRequestStatus(WorkflowRequestStatus.valueOf(workflowRequestDTO.getRequestStatus()));
+			break;
 		}
 		
-		workflowRequest.setApprovedBy(user);
-		
+				
 		return requestRepository.save(workflowRequest);
 	}
 
 	@Override
-	public WorkflowResponseDTO getWorkflowRequest(Long id) {
+	public WorkflowResponse getWorkflowRequest(Long id) {
 		
 		WorkflowRequest workflowRequest = requestRepository.findById(id).orElseThrow(() -> {
 			LOGGER.error("Workflow Request with ID {} not found", id);
 			return new WorkflowRequestNotFoundException("Workflow Request not found with ID " + id);
 		});
 		
-		WorkflowResponseDTO dto = new WorkflowResponseDTO();
+		WorkflowResponse dto = new WorkflowResponse();
 		dto.setId(id);
-		dto.setRequestedAt(workflowRequest.getRequestedAt());
-		dto.setRequestedBy(workflowRequest.getRequestedBy().getName());
+		dto.setRequestedAt(workflowRequest.getCreatedAt());
+		dto.setRequestedBy(workflowRequest.getCreatedBy());
 		dto.setRequestStatus(workflowRequest.getWorkflowRequestStatus());
 		dto.setRequestType(workflowRequest.getWorkflowRequestType());
 		
@@ -179,6 +202,18 @@ public class WorkflowRequestServiceImpl implements WorkflowRequestService {
 		
 		return dto;
 	}
+	
+	private JsonNode parseJson(String jsonString) {
+        if (jsonString == null || jsonString.isEmpty()) {
+            return null;
+        }
+        try {
+            return objectMapper.readTree(jsonString);
+        } catch (Exception e) {
+            // Returns an empty object node instead of crashing the whole request
+            return objectMapper.createObjectNode();
+        }
+    }
 
 
 }

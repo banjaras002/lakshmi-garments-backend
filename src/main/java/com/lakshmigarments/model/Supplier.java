@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 @Table(name = "suppliers")
 @Data
 @NoArgsConstructor
-public class Supplier {
+public class Supplier extends BaseAuditable {
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)

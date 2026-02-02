@@ -29,29 +29,25 @@ public interface JobworkReceiptRepository extends JpaRepository<JobworkReceipt, 
 	List<JobworkReceipt> findByJobworkBatchSerialCodeAndJobworkJobworkType(
 			String serialCode, JobworkType jobworkType);
 
-	
-	@Query("""
-		    SELECT new com.lakshmigarments.dto.PaydayDTO(
-		        COUNT(DISTINCT r.id),
-		        COALESCE(SUM(i.acceptedQuantity), 0),
-		        COALESCE(SUM(i.damagedQuantity), 0),
-		        COALESCE(SUM(i.salesQuantity), 0),
-		        COALESCE(SUM(i.acceptedQuantity * i.wagePerItem), 0)
-		    )
-		    FROM JobworkReceipt r
-		    JOIN r.jobworkReceiptItems i
-		    WHERE  (:fromDate IS NULL OR r.createdAt >= :fromDate)
-		      AND (:toDate IS NULL OR r.createdAt <= :toDate)
-		""")
-		Page<PaydayDTO> getPaydaySummary(
-		    @Param("fromDate") LocalDateTime fromDate,
-		    @Param("toDate") LocalDateTime toDate,
-		    Pageable pageable
-		);
-	
+	// Get jobwork receipts for CLOSED jobworks, optionally filtered by employee name
 	// get the accepted quantity for the jobwork, item, jobwork type
 	@Query(value = "SELECT COALESCE(SUM(i.acceptedQuantity), 0) FROM ", nativeQuery = true)
 	Long getAcceptedQuantityAndPermanantDamagesForJobwork();
 	
+	@Query(
+		    value = """
+		        SELECT jwr.*
+		        FROM jobwork_receipts jwr
+		        JOIN jobworks jw ON jw.id = jwr.jobwork_id
+		        JOIN employees e ON e.id = jw.assigned_to_id
+		        WHERE jw.jobwork_status = 'CLOSED'
+		          AND (:employeeName IS NULL OR e.name = :employeeName)
+		    """,
+		    nativeQuery = true
+		)
+		List<JobworkReceipt> getJobworkReceipts(
+		    @Param("employeeName") String employeeName
+		);
+
 	
 }

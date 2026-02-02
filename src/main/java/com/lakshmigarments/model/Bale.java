@@ -20,7 +20,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Bale {
+public class Bale extends BaseAuditable {
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)

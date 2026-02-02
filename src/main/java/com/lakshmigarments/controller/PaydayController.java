@@ -48,16 +48,41 @@ public class PaydayController {
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
             LocalDateTime toDate
     		) {
-		String sortByEntity =
-		        sortBy.equals("employeeName") ? "completedBy.name" :
-		        sortBy.equals("wage") ? "jobworkReceiptItems.wagePerItem" :
-		        "completedBy.name";
+    	// Convert empty string to null for proper filtering
+    	String employeeNameFilter = (employeeName != null && employeeName.trim().isEmpty()) ? null : employeeName;
+    	
+    	LOGGER.info("Fetching payday summary with filters - employeeName: {}, fromDate: {}, toDate: {}", 
+    			employeeNameFilter, fromDate, toDate);
+    	
+		// Map sortBy to actual entity fields
+		String sortByEntity;
+		switch (sortBy) {
+			case "employeeName":
+				sortByEntity = "e.name";
+				break;
+			case "netWage":
+			case "wage":
+				sortByEntity = "netWage";
+				break;
+			case "grossWage":
+				sortByEntity = "grossWage";
+				break;
+			case "completedJobworkCount":
+				sortByEntity = "completedJobworkCount";
+				break;
+			default:
+				sortByEntity = "e.name";
+		}
+		
 		Sort sort = sortDir.equalsIgnoreCase("asc")
 	            ? Sort.by(sortByEntity).ascending()
 	            : Sort.by(sortByEntity).descending();
+		
 		Pageable pageable = PageRequest.of(page, size, sort);
-        Page<PaydayDTO> paydayDTOs = paydayService.getAllPayday(employeeName, 
+        Page<PaydayDTO> paydayDTOs = paydayService.getAllPayday(employeeNameFilter, 
         		fromDate, toDate, pageable);
+        
+        LOGGER.info("Found {} employees with payday data", paydayDTOs.getTotalElements());
         return new ResponseEntity<>(paydayDTOs, HttpStatus.OK);
     }
 

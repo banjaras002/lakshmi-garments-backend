@@ -1,19 +1,15 @@
 package com.lakshmigarments.service;
 
 import java.util.List;
+import com.lakshmigarments.dto.request.SubCategoryRequest;
+import com.lakshmigarments.dto.response.SubCategoryResponse;
 
-import org.springframework.stereotype.Service;
-
-import com.lakshmigarments.dto.SubCategoryRequestDTO;
-import com.lakshmigarments.dto.SubCategoryResponseDTO;
-
-@Service
 public interface SubCategoryService {
 
-    SubCategoryResponseDTO createSubCategory(SubCategoryRequestDTO subCategoryRequestDTO);
+    SubCategoryResponse createSubCategory(SubCategoryRequest subCategoryRequest);
     
-    SubCategoryResponseDTO updateSubCategory(Long id, SubCategoryRequestDTO subCategoryRequestDTO);
+    SubCategoryResponse updateSubCategory(Long id, SubCategoryRequest subCategoryRequest);
     
-    List<SubCategoryResponseDTO> getAllSubCategories(String search);
+    List<SubCategoryResponse> getAllSubCategories(String search);
 
 }

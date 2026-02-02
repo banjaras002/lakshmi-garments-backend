@@ -1,18 +1,14 @@
 package com.lakshmigarments.service;
 
 import java.util.List;
+import com.lakshmigarments.dto.request.SupplierRequest;
+import com.lakshmigarments.dto.response.SupplierResponse;
 
-import org.springframework.stereotype.Service;
-
-import com.lakshmigarments.dto.SupplierCreateRequest;
-import com.lakshmigarments.dto.SupplierResponse;
-
-@Service
 public interface SupplierService {
 
-    SupplierResponse createSupplier(SupplierCreateRequest supplierRequestDTO);
+    SupplierResponse createSupplier(SupplierRequest supplierRequest);
 
-    SupplierResponse updateSupplier(Long id, SupplierCreateRequest supplierRequestDTO);
+    SupplierResponse updateSupplier(Long id, SupplierRequest supplierRequest);
 
     List<SupplierResponse> getSuppliers(String search);
 

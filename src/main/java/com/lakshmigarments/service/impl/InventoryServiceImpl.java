@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 
 import com.lakshmigarments.dto.CategorySubCategoryCountDTO;
 import com.lakshmigarments.dto.SubCategoryCountDTO;
-import com.lakshmigarments.dto.SubCategoryResponseDTO;
+import com.lakshmigarments.dto.response.SubCategoryResponse;
 import com.lakshmigarments.model.Category;
 import com.lakshmigarments.model.Inventory;
 import com.lakshmigarments.model.SubCategory;
@@ -86,8 +86,8 @@ public class InventoryServiceImpl implements InventoryService {
     }
 
     @Override
-    public List<SubCategoryResponseDTO> getSubCategories(Long categoryId) {
+    public List<SubCategoryResponse> getSubCategories(Long categoryId) {
         List<SubCategory> subCategories = inventoryRepository.findSubCategoriesByCategoryId(categoryId);
-        return subCategories.stream().map(subCategory -> modelMapper.map(subCategory, SubCategoryResponseDTO.class)).collect(Collectors.toList());
+        return subCategories.stream().map(subCategory -> modelMapper.map(subCategory, SubCategoryResponse.class)).collect(Collectors.toList());
     }
 }

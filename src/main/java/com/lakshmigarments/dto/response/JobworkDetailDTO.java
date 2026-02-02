@@ -37,7 +37,7 @@ public class JobworkDetailDTO {
     
     private List<JobworkItemDTO> jobworkItems;
     
-    private List<CreateJobworkReceiptItemRequest> jobworkReceiptItems;
+    private List<JobworkItemResponse> jobworkReceiptItems;
 
 
 }

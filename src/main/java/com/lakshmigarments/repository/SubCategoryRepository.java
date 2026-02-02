@@ -12,9 +12,11 @@ import com.lakshmigarments.model.SubCategory;
 public interface SubCategoryRepository extends JpaRepository<SubCategory, Long>, JpaSpecificationExecutor<SubCategory> {
 
 	Optional<SubCategory> findByName(String name);
-		
+	
+	// when updating the value
 	boolean existsByNameIgnoreCaseAndIdNot(String name, Long id);
 	
+	// when creating
 	boolean existsByNameIgnoreCase(String name);
 
 }	

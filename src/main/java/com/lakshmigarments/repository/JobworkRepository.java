@@ -1,5 +1,6 @@
 package com.lakshmigarments.repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -8,6 +9,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import com.lakshmigarments.model.Batch;
 import com.lakshmigarments.model.Jobwork;
@@ -45,13 +47,30 @@ public interface JobworkRepository extends JpaRepository<Jobwork, Long>, JpaSpec
 	List<Jobwork> findByBatchSerialCodeAndJobworkType(String serialCode, JobworkType jobworkType);
 
 	@Query(value = "SELECT COALESCE(SUM(jwi.quantity), 0) FROM jobworks jw, jobwork_items jwi, batches b "
-			+ " WHERE jw.id = jwi.jobwork_id AND jw.batch_id = b.id AND b.serial_code = :serialCode and jw.jobwork_type = :jobworkType", nativeQuery = true)
+			+ " WHERE jw.id = jwi.jobwork_id AND jw.batch_id = b.id AND b.serial_code = :serialCode and jw.jobwork_type = :jobworkType AND jw.jobwork_status <> 'REASSIGNED'", nativeQuery = true)
 	Long getAssignedQuantities(String serialCode, String jobworkType);
 
 	@Query(value = "SELECT COALESCE(SUM(jwi.quantity), 0) FROM jobworks jw, jobwork_items jwi, batches b, items i "
-			+ " WHERE jw.id = jwi.jobwork_id AND jw.batch_id = b.id AND b.serial_code = :serialCode and jw.jobwork_type = :jobworkType and jwi.item_id = i.id and i.name = :itemName", nativeQuery = true)
+			+ " WHERE jw.id = jwi.jobwork_id AND jw.batch_id = b.id AND b.serial_code = :serialCode and jw.jobwork_type = :jobworkType and jwi.item_id = i.id and i.name = :itemName AND jw.jobwork_status <> 'REASSIGNED'", nativeQuery = true)
 	Long getAssignedQuantities(String serialCode, String jobworkType, String itemName);
 
 	List<Jobwork> findByBatch(Batch batch);
+
+	// Find all jobworks assigned to a specific employee by name
+	List<Jobwork> findByAssignedToNameOrderByCreatedAtDesc(String employeeName);
+
+	// Count pending jobworks (not CLOSED or REASSIGNED) for an employee
+	@Query("SELECT COUNT(j) FROM Jobwork j WHERE j.assignedTo.name = :employeeName " +
+			"AND j.jobworkStatus NOT IN ('CLOSED', 'REASSIGNED')")
+	Long countPendingJobworksByEmployeeName(@Param("employeeName") String employeeName);
+
+	@Query("SELECT j.jobworkNumber FROM Jobwork j WHERE j.assignedTo.name = :employeeName " +
+			"AND j.jobworkStatus NOT IN ('CLOSED', 'REASSIGNED') " +
+			"AND (:startDate IS NULL OR j.createdAt >= :startDate) " +
+			"AND (:endDate IS NULL OR j.createdAt <= :endDate)")
+	List<String> findPendingJobworkNumbersByEmployeeNameAndDateRange(
+			@Param("employeeName") String employeeName,
+			@Param("startDate") LocalDateTime startDate,
+			@Param("endDate") LocalDateTime endDate);
 
 }

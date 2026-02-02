@@ -13,6 +13,7 @@ public class BatchTimelineDetail {
 	private String timeTakenFromPrevious;
 //	private String assignedBy;
 //	private String performedBy;
+	private String transactionType;
 	private LocalDateTime performedAt;
 	private String stage;
 //	private String receivedBy;

@@ -1,6 +1,7 @@
 package com.lakshmigarments.model;
 
 import java.sql.Date;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -35,9 +36,9 @@ public class Invoice extends BaseAuditable {
 	@Column(length = 100, nullable = false)
 	private String invoiceNumber;
 
-	private Date invoiceDate;
+	private LocalDate invoiceDate;
 
-	private Date receivedDate;
+	private LocalDate receivedDate;
 
 	@ManyToOne
 	private Supplier supplier;

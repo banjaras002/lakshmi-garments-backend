@@ -1,16 +1,13 @@
-package com.lakshmigarments.dto;
+package com.lakshmigarments.dto.response;
 
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
-public class CategoryResponseDTO {
+public class TransportResponse {
 
     private Long id;
-
     private String name;
-
-    private String code;
 
 }

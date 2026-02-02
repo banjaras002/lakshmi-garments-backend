@@ -1,8 +1,10 @@
-package com.lakshmigarments.dto;
+package com.lakshmigarments.dto.response;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
+@Getter
+@Setter
 public class SupplierResponse {
 
     private Long id;

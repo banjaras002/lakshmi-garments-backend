@@ -1,5 +1,6 @@
 package com.lakshmigarments.service.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -19,6 +20,7 @@ import com.lakshmigarments.repository.BatchItemRepository;
 import com.lakshmigarments.repository.DamageRepository;
 import com.lakshmigarments.repository.JobworkReceiptRepository;
 import com.lakshmigarments.repository.JobworkRepository;
+import com.lakshmigarments.repository.JobworkReceiptItemRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -31,6 +33,7 @@ public class BatchItemServiceImpl implements BatchItemService {
     private final JobworkReceiptRepository receiptRepository;
     private final JobworkRepository jobworkRepository;
     private final DamageRepository damageRepository;
+    private final JobworkReceiptItemRepository receiptItemRepository;
     private final ModelMapper modelMapper;
 
     @Override
@@ -38,6 +41,8 @@ public class BatchItemServiceImpl implements BatchItemService {
         LOGGER.debug("Fetching items by batch serial: {}", serialCode);
         List<BatchItem> batchItems = batchItemRepository.findByBatchSerialCode(serialCode);
         
+        List<BatchItemResponse> batchItemResponses = new ArrayList<>();
+        long i = 1;
         for (BatchItem batchItem : batchItems) {
 			Long totalBatchItemQuantity = batchItem.getQuantity();
 			Long totalAssignedQuantity = jobworkRepository.getAssignedQuantities(serialCode, 
@@ -46,14 +51,78 @@ public class BatchItemServiceImpl implements BatchItemService {
 					DamageType.REPAIRABLE.name(), jobworkType, batchItem.getItem().getName());
 			LOGGER.debug("Batch item {} {} quantities : original quantity {}, repairable damages {}, assigned quantity {}", 
 					serialCode, batchItem.getItem().getName(), totalBatchItemQuantity, totalRepairableDamagesForItem, totalAssignedQuantity);
+			
+			Long availableQuantity = totalBatchItemQuantity - totalAssignedQuantity + totalRepairableDamagesForItem;
+			BatchItemResponse batchItemResponse = new BatchItemResponse();
+			batchItemResponse.setName(batchItem.getItem().getName());
+			batchItemResponse.setAvailableQuantity(availableQuantity);
+			batchItemResponse.setId(i);
+			
+			batchItemResponses.add(batchItemResponse);
+			i += 1;
+			
+		}
+        if (JobworkType.STITCHING.name().equals(jobworkType)) {
+			return batchItemResponses;
 		}
         
-        List<JobworkReceipt> receipts = receiptRepository
-        		.findByJobworkBatchSerialCodeAndJobworkJobworkType(serialCode, JobworkType.valueOf(jobworkType));
-        LOGGER.debug("Fetched {} jobworks for batch {} and jobwork type {}", receipts.size(),serialCode, jobworkType);
+        // Logic for packaging - get items based on finished stitching items
+        LOGGER.debug("Calculating available items for packaging for batch {}", serialCode);
         
-        return batchItems.stream().map(batchItem -> modelMapper.map(batchItem, BatchItemResponse.class))
-                .collect(Collectors.toList());
+        // Clear previous responses as we need to recalculate for packaging
+        batchItemResponses.clear();
+        i = 1;
+        
+        // For packaging, we need to check what items are available from stitching receipts
+        for (BatchItem batchItem : batchItems) {
+        	String itemName = batchItem.getItem().getName();
+        	
+        	// Get total accepted quantity from stitching receipts (finished items from stitching)
+        	Long totalAcceptedFromStitching = receiptItemRepository
+        			.getAcceptedQuantityByBatchAndJobworkTypeAndItem(
+        					serialCode, 
+        					JobworkType.STITCHING.name(), 
+        					itemName);
+        	LOGGER.debug("Total accepted quantity from STITCHING for item {} in batch {}: {}", 
+        			itemName, serialCode, totalAcceptedFromStitching);
+        	
+        	// Get quantities already assigned to packaging jobworks
+        	Long assignedToPackaging = jobworkRepository.getAssignedQuantities(
+        			serialCode, 
+        			JobworkType.PACKAGING.name(), 
+        			itemName);
+        	LOGGER.debug("Already assigned to PACKAGING for item {} in batch {}: {}", 
+        			itemName, serialCode, assignedToPackaging);
+        	
+        	// Get repairable damages from packaging (these can be reassigned)
+        	Long repairableDamagesFromPackaging = damageRepository.getDamagedQuantity(
+        			serialCode, 
+        			DamageType.REPAIRABLE.name(), 
+        			JobworkType.PACKAGING.name(), 
+        			itemName);
+        	LOGGER.debug("Repairable damages from PACKAGING for item {} in batch {}: {}", 
+        			itemName, serialCode, repairableDamagesFromPackaging);
+        	
+        	// Calculate available quantity for packaging
+        	// Available = (Accepted from Stitching) - (Assigned to Packaging) + (Repairable Damages from Packaging)
+        	Long availableForPackaging = totalAcceptedFromStitching - assignedToPackaging + repairableDamagesFromPackaging;
+        	
+        	LOGGER.debug("Available quantity for PACKAGING for item {} in batch {}: {}", 
+        			itemName, serialCode, availableForPackaging);
+        	
+        	// Only add items that have available quantity
+        	if (availableForPackaging > 0) {
+        		BatchItemResponse batchItemResponse = new BatchItemResponse();
+        		batchItemResponse.setName(itemName);
+        		batchItemResponse.setAvailableQuantity(availableForPackaging);
+        		batchItemResponse.setId(i);
+        		batchItemResponses.add(batchItemResponse);
+        		i += 1;
+        	}
+        }
+        
+        LOGGER.debug("Total items available for PACKAGING in batch {}: {}", serialCode, batchItemResponses.size());
+        return batchItemResponses;
     }
     
     private BatchItem getBatchItemOrThrow(String serialCode, String itemName) {

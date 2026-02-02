@@ -8,12 +8,10 @@ import org.springframework.context.annotation.Configuration;
 import com.lakshmigarments.dto.BaleDTO;
 import com.lakshmigarments.dto.BatchResponseDTO;
 import com.lakshmigarments.dto.BatchResponseDTO.BatchSubCategoryResponseDTO;
-import com.lakshmigarments.dto.SupplierCreateRequest;
-import com.lakshmigarments.dto.WorkflowResponseDTO;
-import com.lakshmigarments.dto.request.UserCreateRequest;
 import com.lakshmigarments.dto.response.BatchItemResponse;
 import com.lakshmigarments.dto.response.JobworkResponse;
 import com.lakshmigarments.dto.response.UserResponse;
+import com.lakshmigarments.dto.response.WorkflowResponse;
 import com.lakshmigarments.dto.InvoiceDTO;
 import com.lakshmigarments.dto.JobworkItemDTO;
 import com.lakshmigarments.dto.JobworkResponseDTO;
@@ -105,8 +103,8 @@ public class ModelMapperConfig {
 			mapper.map(src -> src.getItem().getName(), BatchItemResponse::setName);
 		});
 		
-		modelMapper.typeMap(WorkflowRequest.class, WorkflowResponseDTO.class)
-        .addMapping(src -> src.getRequestedBy().getUsername(), WorkflowResponseDTO::setRequestedBy);
+		modelMapper.typeMap(WorkflowRequest.class, WorkflowResponse.class)
+        .addMapping(src -> src.getCreatedBy(), WorkflowResponse::setRequestedBy);
 		
 		return modelMapper;
 

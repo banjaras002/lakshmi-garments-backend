@@ -47,4 +47,6 @@ public interface BatchService {
     
     void recalculateBatchStatus(Batch batch);
     
+    List<String> getAllBatchSerialCode();
+    
 }

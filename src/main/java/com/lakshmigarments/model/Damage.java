@@ -17,7 +17,7 @@ public class Damage {
     private Long id;
     
     @ManyToOne
-    private JobworkReceipt jobworkReceipt;
+    private JobworkReceiptItem jobworkReceiptItem;
 
     private Long quantity;
     

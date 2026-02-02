@@ -16,7 +16,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-public class Transport {
+public class Transport extends BaseAuditable {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)

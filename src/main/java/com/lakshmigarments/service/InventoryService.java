@@ -5,7 +5,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import com.lakshmigarments.dto.CategorySubCategoryCountDTO;
-import com.lakshmigarments.dto.SubCategoryResponseDTO;
+import com.lakshmigarments.dto.response.SubCategoryResponse;
 
 @Service
 public interface InventoryService {
@@ -14,6 +14,6 @@ public interface InventoryService {
 
 	Long getCategorySubCategoryCount(Long categoryId, Long subCategoryId);
 	
-	List<SubCategoryResponseDTO> getSubCategories(Long categoryId);
+	List<SubCategoryResponse> getSubCategories(Long categoryId);
 
 }

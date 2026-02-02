@@ -1,6 +1,7 @@
 package com.lakshmigarments.model;
 
 import jakarta.persistence.*;
+import jakarta.persistence.Version;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.annotation.*;
@@ -26,4 +27,7 @@ public abstract class BaseAuditable {
 
     @LastModifiedDate
     private LocalDateTime lastModifiedAt;
+    
+    @Version
+    private Long version;
 }

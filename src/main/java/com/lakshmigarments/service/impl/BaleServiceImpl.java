@@ -32,6 +32,8 @@ import com.lakshmigarments.repository.MaterialLedgerRepository;
 import com.lakshmigarments.repository.SubCategoryRepository;
 import com.lakshmigarments.repository.UserRepository;
 
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
@@ -53,19 +55,21 @@ public class BaleServiceImpl implements BaleService {
 	@Override
 	@Transactional
 	public void updateBale(Long baleId, BaleDTO baleDTO) {
-
+		
+		Authentication authentication =
+	            SecurityContextHolder.getContext().getAuthentication();
+		String role = authentication.getAuthorities().stream()
+		        .map(grantedAuthority -> grantedAuthority.getAuthority())
+		        .findFirst()
+		        .map(r -> r.replace("ROLE_", ""))
+		        .orElse(null);
 		LOGGER.info("Updating bale with id: {}", baleId);
 
 		Bale bale = baleRepository.findById(baleId)
 				.orElseThrow(() -> new BaleNotFoundException("Bale not found with id: " + baleId));
 
-		User user = userRepository.findById(baleDTO.getUpdatedById()).orElseThrow(() -> {
-			LOGGER.error("User with ID {} not found", baleDTO.getUpdatedById());
-			return new UserNotFoundException("User not found with ID " + baleDTO.getUpdatedById());
-		});
-
 		Invoice invoice = bale.getLorryReceipt().getInvoice();
-		editWindowPolicy.validateEditPermission(invoice.getCreatedAt(), user.getRole().getName());
+		editWindowPolicy.validateEditPermission(invoice.getCreatedAt(), role);
 
 		/*
 		 * ---------------------------- 1️⃣ Capture OLD state

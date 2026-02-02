@@ -1,6 +1,7 @@
 package com.lakshmigarments.service;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -60,7 +61,7 @@ public class InvoiceService {
 
 	public Page<InvoiceDTO> getInvoices(Integer pageNo, Integer pageSize, String sortBy, String sortDir,
 			String invoiceNumber, List<String> supplierNames, List<String> transportNames, List<Boolean> isPaid,
-			String search, Date invoiceStartDate, Date invoiceEndDate, Date receivedStartDate, Date receivedEndDate) {
+			String search, LocalDate invoiceStartDate, LocalDate invoiceEndDate, LocalDate receivedStartDate, LocalDate receivedEndDate) {
 
 		// Set default values if needed
 		if (pageNo == null) {
@@ -81,7 +82,8 @@ public class InvoiceService {
 		}
 
 		Pageable pageable = PageRequest.of(pageNo, pageSize, sort);
-
+		
+		System.out.println("from service + " + invoiceStartDate + " " + invoiceEndDate);
 		// Build dynamic specification based on the search parameters
 		Specification<Invoice> specification = Specification
 				.where(InvoiceSpecification.filterByInvoiceNumber(invoiceNumber))
@@ -97,13 +99,13 @@ public class InvoiceService {
 			specification = specification.and(searchSpecification);
 		}
 
-		// Apply date range filters if start and end dates are provided
-		if (invoiceStartDate != null && invoiceEndDate != null) {
+		// Apply date range filters if at least one date is provided
+		if (invoiceStartDate != null || invoiceEndDate != null) {
 			specification = specification
 					.and(InvoiceSpecification.filterByInvoiceDateBetween(invoiceStartDate, invoiceEndDate));
 		}
 
-		if (receivedStartDate != null && receivedEndDate != null) {
+		if (receivedStartDate != null || receivedEndDate != null) {
 			specification = specification
 					.and(InvoiceSpecification.filterByReceivedDateBetween(receivedStartDate, receivedEndDate));
 		}

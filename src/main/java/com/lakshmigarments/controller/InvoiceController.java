@@ -1,5 +1,6 @@
 package com.lakshmigarments.controller;
 
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 
@@ -44,12 +45,11 @@ public class InvoiceController {
                                         @RequestParam(required = false) List<String> supplierNames,
                                         @RequestParam(required = false) List<String> transportNames,
                                         @RequestParam(required = false) List<Boolean> isPaid,
-                                        @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date invoiceStartDate,
-                                        @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date invoiceEndDate,
-                                        @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date receivedStartDate,
-                                        @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date receivedEndDate,
+                                        @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate invoiceStartDate,
+                                        @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate invoiceEndDate,
+                                        @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate receivedStartDate,
+                                        @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate receivedEndDate,
                                         @RequestParam(required = false) String search) {
-
         return invoiceService.getInvoices(pageNo, pageSize, sortBy, sortOrder, invoiceNumber, supplierNames,
         		transportNames, isPaid, search, invoiceStartDate, invoiceEndDate, receivedStartDate, receivedEndDate);
     }

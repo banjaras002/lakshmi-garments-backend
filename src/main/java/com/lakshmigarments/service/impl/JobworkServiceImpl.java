@@ -1,9 +1,11 @@
 package com.lakshmigarments.service.impl;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -17,6 +19,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import com.lakshmigarments.context.UserContext;
@@ -32,7 +36,12 @@ import com.lakshmigarments.dto.request.CreateJobworkRequest;
 import com.lakshmigarments.dto.request.CreateDamageRequest;
 import com.lakshmigarments.dto.request.CreateItemBasedJobworkRequest;
 import com.lakshmigarments.dto.request.CreateJobworkReceiptItemRequest;
+import com.lakshmigarments.dto.response.EmployeeJobworkResponse;
+import com.lakshmigarments.dto.response.ItemResponse;
+import com.lakshmigarments.dto.response.DetailedEmployeeJobworkResponse;
+import com.lakshmigarments.dto.response.EmployeeJobworkReportResponse;
 import com.lakshmigarments.dto.response.JobworkDetailDTO;
+import com.lakshmigarments.dto.response.JobworkItemResponse;
 import com.lakshmigarments.dto.response.JobworkResponse;
 import com.lakshmigarments.model.Batch;
 import com.lakshmigarments.model.BatchItem;
@@ -66,6 +75,7 @@ import com.lakshmigarments.repository.JobworkItemRepository;
 import com.lakshmigarments.repository.JobworkReceiptRepository;
 import com.lakshmigarments.repository.JobworkRepository;
 import com.lakshmigarments.repository.UserRepository;
+import com.lakshmigarments.repository.specification.JobworkSpecification;
 import com.lakshmigarments.service.BatchService;
 import com.lakshmigarments.service.JobworkService;
 import com.lakshmigarments.service.validation.JobworkCreationValidator;
@@ -75,7 +85,7 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-public class JobworkServiceImpl implements JobworkService {
+public class JobworkServiceImpl implements JobworkService<CreateJobworkRequest> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(JobworkServiceImpl.class);
 	private final JobworkRepository jobworkRepository;
@@ -91,30 +101,63 @@ public class JobworkServiceImpl implements JobworkService {
 	private final JobworkCreationValidator jobworkCreationValidator;
 	private final BatchService batchService;
 
-	public Page<JobworkResponseDTO> getAllJobworks(Pageable pageable, String search) {
+	@Override
+	public Page<JobworkResponseDTO> getAllJobworks(Pageable pageable, String search, List<String> assignedToNames,
+			List<JobworkStatus> statuses, List<JobworkType> types, List<String> batchSerialCodes,
+			LocalDateTime startDate, LocalDateTime endDate) {
 
-		Page<Jobwork> jobworks;
+		// 1. Build Dynamic Specification
+		Specification<Jobwork> spec = Specification.where(null);
 
-		// 1. Apply search ONLY on jobworkNumber
+		// Global Search (Case-insensitive Jobwork Number)
 		if (search != null && !search.trim().isEmpty()) {
-			jobworks = jobworkRepository.findByJobworkNumberContainingIgnoreCase(search.trim(), pageable);
-		} else {
-			jobworks = jobworkRepository.findAll(pageable);
+			spec = spec.and(JobworkSpecification.filterUniqueByJobworkNumber(search.trim()));
 		}
 
+		// Filter by Multiple Employee Names
+		if (assignedToNames != null && !assignedToNames.isEmpty()) {
+			spec = spec.and(JobworkSpecification.assignedToNamesIn(assignedToNames));
+		}
+
+		// Filter by Multiple Statuses
+		if (statuses != null && !statuses.isEmpty()) {
+			spec = spec.and(JobworkSpecification.hasStatuses(statuses));
+		}
+
+		// Filter by Multiple Jobwork Types
+		if (types != null && !types.isEmpty()) {
+			spec = spec.and(JobworkSpecification.hasJobworkTypes(types));
+		}
+
+		// Filter by Multiple Batch Serial Codes
+		if (batchSerialCodes != null && !batchSerialCodes.isEmpty()) {
+			spec = spec.and(JobworkSpecification.batchSerialCodesIn(batchSerialCodes));
+		}
+
+		// Date Range Filter
+		if (startDate != null || endDate != null) {
+			spec = spec.and(JobworkSpecification.assignedBetween(startDate, endDate));
+		}
+
+		// 2. Fetch Jobworks using Specification
+		Page<Jobwork> jobworks = jobworkRepository.findAll(spec, pageable);
+
+		// 3. Optimized Receipt Fetching (Batching to prevent N+1)
 		List<String> jobworkNumbers = jobworks.getContent().stream().map(Jobwork::getJobworkNumber).toList();
 
-		List<JobworkReceipt> receipts = jobworkReceiptRepository.findByJobworkJobworkNumberIn(jobworkNumbers);
+		Map<String, List<JobworkReceipt>> receiptsByJobworkNumber = new HashMap<>();
+		if (!jobworkNumbers.isEmpty()) {
+			List<JobworkReceipt> receipts = jobworkReceiptRepository.findByJobworkJobworkNumberIn(jobworkNumbers);
+			receiptsByJobworkNumber = receipts.stream()
+					.collect(Collectors.groupingBy(r -> r.getJobwork().getJobworkNumber()));
+		}
 
-		Map<String, List<JobworkReceipt>> receiptsByJobworkNumber = receipts.stream()
-				.collect(Collectors.groupingBy(r -> r.getJobwork().getJobworkNumber()));
-
+		// 4. Convert to DTO
 		List<JobworkResponseDTO> jobworkResponseDTOs = convertToJobworkResponseDTO(jobworks.getContent(),
 				receiptsByJobworkNumber);
 
-		LOGGER.info("Fetched {} jobworks", jobworkResponseDTOs.size());
+		LOGGER.info("Fetched {} filtered jobworks on page {}", jobworkResponseDTOs.size(), pageable.getPageNumber());
 		return new PageImpl<>(jobworkResponseDTOs, pageable, jobworks.getTotalElements());
-
 	}
 
 //	@Override
@@ -275,8 +318,8 @@ public class JobworkServiceImpl implements JobworkService {
 		dto.setRemarks(jobwork.getRemarks());
 		dto.setJobworkItems(jobworkItemDTOs);
 
-		List<CreateJobworkReceiptItemRequest> receiptItemDTOs = receipts.stream()
-				.flatMap(r -> r.getJobworkReceiptItems().stream()).map(this::toReceiptItemDTO).toList();
+		List<JobworkItemResponse> receiptItemDTOs = receipts.stream().flatMap(r -> r.getJobworkReceiptItems().stream())
+				.map(this::toReceiptItemDTO).toList();
 
 		dto.setJobworkReceiptItems(receiptItemDTOs);
 		dto.setJobworkStatus(jobwork.getJobworkStatus().toString());
@@ -284,16 +327,16 @@ public class JobworkServiceImpl implements JobworkService {
 		return dto;
 	}
 
-	private CreateJobworkReceiptItemRequest toReceiptItemDTO(JobworkReceiptItem item) {
-		CreateJobworkReceiptItemRequest dto = new CreateJobworkReceiptItemRequest();
+	private JobworkItemResponse toReceiptItemDTO(JobworkReceiptItem item) {
+		JobworkItemResponse jobworkItemResponse = new JobworkItemResponse();
 
-		dto.setItemName(item.getItem().getName());
-		dto.setAcceptedQuantity(item.getAcceptedQuantity());
-		dto.setSalesQuantity(item.getSalesQuantity());
-		dto.setSalesPrice(item.getSalesPrice());
-		dto.setWagePerItem(item.getWagePerItem());
-//		dto.setda(item.getDamagedQuantity());
-		return dto;
+		jobworkItemResponse.setItemName(item.getItem().getName());
+		jobworkItemResponse.setAcceptedQuantity(item.getAcceptedQuantity());
+		jobworkItemResponse.setSalesQuantity(item.getSalesQuantity());
+		jobworkItemResponse.setSalesPrice(item.getSalesPrice());
+		jobworkItemResponse.setWagePerItem(item.getWagePerItem());
+		jobworkItemResponse.setDamagedQuantity(item.getDamagedQuantity());
+		return jobworkItemResponse;
 	}
 
 	public String getNextJobworkNumber() {
@@ -615,8 +658,9 @@ public class JobworkServiceImpl implements JobworkService {
 		jobwork.setJobworkStatus(JobworkStatus.AWAITING_CLOSE);
 		Jobwork savedJobwork = jobworkRepository.save(jobwork);
 		LOGGER.debug("Reopened jobwork {}", jobworkNumber);
-		
-		jobwork.getJobworkItems().forEach(jobworkItem -> jobworkItem.setJobworkItemStatus(JobworkItemStatus.AWAITING_CLOSE));
+
+		jobwork.getJobworkItems()
+				.forEach(jobworkItem -> jobworkItem.setJobworkItemStatus(JobworkItemStatus.AWAITING_CLOSE));
 
 		batchService.recalculateBatchStatus(jobwork.getBatch());
 
@@ -625,6 +669,26 @@ public class JobworkServiceImpl implements JobworkService {
 		mappedJobworkResponse.setAssignedTo(savedJobwork.getAssignedTo().getName());
 		return mappedJobworkResponse;
 
+	}
+
+	@Override
+	public List<ItemResponse> getItemsForJobwork(String jobworkNumber) {
+
+		Jobwork jobwork = this.getJobworkOrThrow(jobworkNumber);
+		List<JobworkItem> jobworkItems = jobwork.getJobworkItems();
+
+		List<ItemResponse> itemResponses = new ArrayList<>();
+
+		long i = 1;
+		for (JobworkItem jobworkItem : jobworkItems) {
+			ItemResponse itemResponse = new ItemResponse();
+			itemResponse.setId(i);
+			itemResponse.setName(jobworkItem.getItem().getName());
+			i += 1;
+			itemResponses.add(itemResponse);
+		}
+
+		return itemResponses;
 	}
 
 	private Jobwork getJobworkOrThrow(String jobworkNumber) {
@@ -662,10 +726,167 @@ public class JobworkServiceImpl implements JobworkService {
 		});
 	}
 
-//	@Override
-//	public List<String> getUnfinishedJobworks(String employeeName, String jobworkNumber) {
-//		// TODO Auto-generated method stub
-//		return null;
-//	}
+	@Override
+	public EmployeeJobworkReportResponse getDetailedJobworksByEmployee(String employeeName, LocalDateTime startDate,
+			LocalDateTime endDate) {
+		LOGGER.info("Generating detailed jobwork report for employee: {} from {} to {}", employeeName, startDate, endDate);
 
+		// 1. Build Specification for filtering
+		Specification<Jobwork> spec = Specification.where(JobworkSpecification.assignedToNamesIn(List.of(employeeName)));
+		if (startDate != null || endDate != null) {
+			spec = spec.and(JobworkSpecification.assignedBetween(startDate, endDate));
+		}
+
+		// 2. Fetch Jobworks
+		List<Jobwork> jobworks = jobworkRepository.findAll(spec, Sort.by(Sort.Direction.DESC, "createdAt"));
+		LOGGER.debug("Found {} jobworks for filtering criteria", jobworks.size());
+
+		if (jobworks.isEmpty()) {
+			return EmployeeJobworkReportResponse.builder()
+					.jobworks(new ArrayList<>())
+					.stats(EmployeeJobworkReportResponse.OverallStats.builder()
+							.totalJobworks(0L)
+							.totalIssuedQuantity(0L)
+							.totalAcceptedQuantity(0L)
+							.totalDamagedQuantity(0L)
+							.totalSalesQuantity(0L)
+							.damageBreakdown(new HashMap<>())
+							.build())
+					.build();
+		}
+
+		// 3. Optimized Receipt & Damage Fetching
+		List<String> jobworkNumbers = jobworks.stream().map(Jobwork::getJobworkNumber).toList();
+		List<JobworkReceipt> receipts = jobworkReceiptRepository.findByJobworkJobworkNumberIn(jobworkNumbers);
+		
+		Map<String, List<JobworkReceiptItem>> receiptItemsByJobworkNumber = receipts.stream()
+				.flatMap(r -> r.getJobworkReceiptItems().stream())
+				.collect(Collectors.groupingBy(ri -> ri.getJobworkReceipt().getJobwork().getJobworkNumber()));
+
+		// 4. Transform to Detailed Responses and Calculate Stats
+		List<DetailedEmployeeJobworkResponse> detailedResponses = new ArrayList<>();
+		
+		long overallIssued = 0, overallAccepted = 0, overallDamaged = 0, overallSales = 0;
+		Map<String, Long> overallDamageBreakdown = new HashMap<>();
+
+		for (Jobwork jw : jobworks) {
+			String jwNum = jw.getJobworkNumber();
+			List<JobworkReceiptItem> riList = receiptItemsByJobworkNumber.getOrDefault(jwNum, List.of());
+			
+			// Group receipt items by item name for easier consolidation
+			Map<String, List<JobworkReceiptItem>> riByItem = riList.stream()
+					.collect(Collectors.groupingBy(ri -> ri.getItem() != null ? ri.getItem().getName() : jw.getJobworkType().name()));
+
+			List<DetailedEmployeeJobworkResponse.ItemDetail> itemDetails = new ArrayList<>();
+			
+			for (JobworkItem jwi : jw.getJobworkItems()) {
+				String itemName = jwi.getItem() != null ? jwi.getItem().getName() : jw.getJobworkType().name();
+				List<JobworkReceiptItem> itemReceipts = riByItem.getOrDefault(itemName, List.of());
+				
+				long issued = jwi.getQuantity();
+				long accepted = itemReceipts.stream().mapToLong(JobworkReceiptItem::getAcceptedQuantity).sum();
+				long damaged = itemReceipts.stream().mapToLong(JobworkReceiptItem::getDamagedQuantity).sum();
+				long sales = itemReceipts.stream().mapToLong(JobworkReceiptItem::getSalesQuantity).sum();
+				
+				Map<String, Long> itemDamageBreakdown = new HashMap<>();
+				itemReceipts.stream()
+						.flatMap(ri -> ri.getDamages().stream())
+						.forEach(d -> {
+							String type = d.getDamageType().name();
+							itemDamageBreakdown.put(type, itemDamageBreakdown.getOrDefault(type, 0L) + d.getQuantity());
+							overallDamageBreakdown.put(type, overallDamageBreakdown.getOrDefault(type, 0L) + d.getQuantity());
+						});
+
+				itemDetails.add(DetailedEmployeeJobworkResponse.ItemDetail.builder()
+						.itemName(itemName)
+						.issuedQuantity(issued)
+						.acceptedQuantity(accepted)
+						.damagedQuantity(damaged)
+						.salesQuantity(sales)
+						.salesPrice(itemReceipts.isEmpty() ? 0.0 : itemReceipts.get(0).getSalesPrice())
+						.wagePerItem(itemReceipts.isEmpty() ? 0.0 : itemReceipts.get(0).getWagePerItem())
+						.status(jwi.getJobworkItemStatus().name())
+						.damageBreakdown(itemDamageBreakdown)
+						.build());
+				
+				overallIssued += issued;
+				overallAccepted += accepted;
+				overallDamaged += damaged;
+				overallSales += sales;
+			}
+
+			detailedResponses.add(DetailedEmployeeJobworkResponse.builder()
+					.jobworkNumber(jwNum)
+					.jobworkType(jw.getJobworkType().name())
+					.jobworkStatus(jw.getJobworkStatus().name())
+					.batchSerialCode(jw.getBatch().getSerialCode())
+					.startedAt(jw.getCreatedAt())
+					.lastUpdatedAt(jw.getLastModifiedAt())
+					.remarks(jw.getRemarks())
+					.items(itemDetails)
+					.build());
+		}
+
+		EmployeeJobworkReportResponse response = EmployeeJobworkReportResponse.builder()
+				.jobworks(detailedResponses)
+				.stats(EmployeeJobworkReportResponse.OverallStats.builder()
+						.totalJobworks((long) jobworks.size())
+						.totalIssuedQuantity(overallIssued)
+						.totalAcceptedQuantity(overallAccepted)
+						.totalDamagedQuantity(overallDamaged)
+						.totalSalesQuantity(overallSales)
+						.damageBreakdown(overallDamageBreakdown)
+						.build())
+				.build();
+
+		LOGGER.info("Successfully generated report with {} jobworks and {} total pieces issued", jobworks.size(), overallIssued);
+		return response;
+	}
+
+	@Override
+	public List<EmployeeJobworkResponse> getJobworksByEmployeeName(String employeeName) {
+		LOGGER.info("Fetching all jobworks for employee: {}", employeeName);
+
+		// Fetch all jobworks assigned to the employee
+		List<Jobwork> jobworks = jobworkRepository.findByAssignedToNameOrderByCreatedAtDesc(employeeName);
+		LOGGER.debug("Found {} jobworks for employee: {}", jobworks.size(), employeeName);
+
+		if (jobworks.isEmpty()) {
+			LOGGER.warn("No jobworks found for employee: {}", employeeName);
+			return new ArrayList<>();
+		}
+
+		// Convert to response DTO
+		List<EmployeeJobworkResponse> responses = new ArrayList<>();
+
+		for (Jobwork jobwork : jobworks) {
+			EmployeeJobworkResponse response = new EmployeeJobworkResponse();
+			response.setJobworkNumber(jobwork.getJobworkNumber());
+			response.setJobworkType(jobwork.getJobworkType() != null ? jobwork.getJobworkType().name() : null);
+			response.setJobworkStatus(jobwork.getJobworkStatus() != null ? jobwork.getJobworkStatus().name() : null);
+			response.setBatchSerialCode(jobwork.getBatch() != null ? jobwork.getBatch().getSerialCode() : null);
+			response.setStartedAt(jobwork.getCreatedAt());
+			response.setUpdatedAt(jobwork.getLastModifiedAt());
+			response.setRemarks(jobwork.getRemarks());
+
+			// Fetch jobwork items (pieces/items issued to this jobwork)
+			List<JobworkItem> jobworkItems = jobwork.getJobworkItems();
+			List<EmployeeJobworkResponse.JobworkItemDetail> itemDetails = new ArrayList<>();
+
+			for (JobworkItem jobworkItem : jobworkItems) {
+				EmployeeJobworkResponse.JobworkItemDetail itemDetail = new EmployeeJobworkResponse.JobworkItemDetail();
+				itemDetail.setItemName(jobworkItem.getItem() != null ? jobworkItem.getItem().getName() : null);
+				itemDetail.setQuantity(jobworkItem.getQuantity());
+				itemDetails.add(itemDetail);
+			}
+
+			response.setItems(itemDetails);
+			responses.add(response);
+
+			LOGGER.debug("Processed jobwork {} with {} items", jobwork.getJobworkNumber(), itemDetails.size());
+		}
+
+		LOGGER.info("Successfully fetched {} jobworks for employee: {}", responses.size(), employeeName);
+		return responses;
+	}
 }

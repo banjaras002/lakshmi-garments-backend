@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import com.lakshmigarments.dto.request.ChangePasswordRequest;
 import com.lakshmigarments.dto.request.UserCreateRequest;
 import com.lakshmigarments.dto.request.UserUpdateRequest;
 import com.lakshmigarments.dto.response.UserResponse;
@@ -16,7 +17,11 @@ public interface UserService {
 	
 	UserResponse createUser(UserCreateRequest userCreateRequest);
 	
+	UserResponse getUserByUsername(String username);
+	
 	UserResponse updateUser(Long id, UserUpdateRequest userUpdateRequest);
+
+	void changePassword(String username, ChangePasswordRequest changePasswordRequest);
 	
 	String adminResetPassword(Long id);
 

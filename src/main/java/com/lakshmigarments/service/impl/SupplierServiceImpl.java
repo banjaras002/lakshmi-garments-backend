@@ -6,82 +6,100 @@ import java.util.stream.Collectors;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import com.lakshmigarments.dto.SupplierCreateRequest;
-import com.lakshmigarments.dto.SupplierResponse;
-import com.lakshmigarments.model.Supplier;
+import com.lakshmigarments.dto.request.SupplierRequest;
+import com.lakshmigarments.dto.response.SupplierResponse;
 import com.lakshmigarments.exception.DuplicateSupplierException;
 import com.lakshmigarments.exception.SupplierNotFoundException;
+import com.lakshmigarments.model.Supplier;
 import com.lakshmigarments.repository.SupplierRepository;
+import com.lakshmigarments.repository.specification.SupplierSpecification;
 import com.lakshmigarments.service.SupplierService;
 
-import lombok.AllArgsConstructor;
-
-import com.lakshmigarments.repository.specification.SupplierSpecification;
+import lombok.RequiredArgsConstructor;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class SupplierServiceImpl implements SupplierService {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(SupplierServiceImpl.class);
 
 	private final SupplierRepository supplierRepository;
-
 	private final ModelMapper modelMapper;
 
 	@Override
-	public SupplierResponse createSupplier(SupplierCreateRequest supplierRequest) {
+	@Transactional(readOnly = true)
+	public List<SupplierResponse> getSuppliers(String search) {
+		LOGGER.debug("Fetching all suppliers matching: {}", search);
+		Specification<Supplier> spec = SupplierSpecification.filterByName(search);
+		List<Supplier> suppliers = supplierRepository.findAll(spec);
+
+		LOGGER.debug("Found {} supplier(s)", suppliers.size());
+		return suppliers.stream()
+				.map(supplier -> modelMapper.map(supplier, SupplierResponse.class))
+				.collect(Collectors.toList());
+	}
+
+	@Override
+	@Transactional
+	public SupplierResponse createSupplier(SupplierRequest supplierRequest) {
+		LOGGER.debug("Creating supplier: {}", supplierRequest.getName());
 		String supplierName = supplierRequest.getName().trim();
 		String supplierLocation = supplierRequest.getLocation().trim();
 
-		if (supplierRepository.existsByNameIgnoreCase(supplierName)) {
-			LOGGER.error("Supplier already exists with name {}", supplierName);
-			throw new DuplicateSupplierException("Supplier already exists with name " + supplierName);
-		}
+		validateSupplierUniqueness(supplierName, null);
 
 		Supplier supplier = new Supplier();
 		supplier.setName(supplierName);
 		supplier.setLocation(supplierLocation);
 
 		Supplier savedSupplier = supplierRepository.save(supplier);
-		LOGGER.info("Supplier created with name {}", savedSupplier.getName());
+		LOGGER.info("Supplier created successfully with ID: {}", savedSupplier.getId());
 		return modelMapper.map(savedSupplier, SupplierResponse.class);
 	}
 
 	@Override
-	public SupplierResponse updateSupplier(Long id, SupplierCreateRequest supplierRequest) {
-
+	@Transactional
+	public SupplierResponse updateSupplier(Long id, SupplierRequest supplierRequest) {
+		LOGGER.debug("Updating supplier with ID: {}", id);
+		
+		Supplier supplier = this.getSupplierOrThrow(id);
+		
 		String supplierName = supplierRequest.getName().trim();
 		String supplierLocation = supplierRequest.getLocation().trim();
 
-		Supplier supplier = supplierRepository.findById(id).orElseThrow(() -> {
-			LOGGER.error("Supplier not found with ID: {}", id);
-			return new SupplierNotFoundException("Supplier not found with ID: " + id);
-		});
-
-		if (supplierRepository.existsByNameIgnoreCaseAndIdNot(supplierName, id)) {
-			LOGGER.error("Supplier already exists with name {}", supplierName);
-			throw new DuplicateSupplierException("Supplier already exists with name " + supplierName);
-		}
+		validateSupplierUniqueness(supplierName, id);
 
 		supplier.setName(supplierName);
 		supplier.setLocation(supplierLocation);
 
-		Supplier saveSupplier = supplierRepository.save(supplier);
-		LOGGER.info("Supplier updated with name {}", saveSupplier.getName());
-		return modelMapper.map(saveSupplier, SupplierResponse.class);
+		Supplier savedSupplier = supplierRepository.save(supplier);
+		LOGGER.info("Supplier updated successfully with ID: {}", savedSupplier.getId());
+		return modelMapper.map(savedSupplier, SupplierResponse.class);
 	}
 
-	@Override
-	public List<SupplierResponse> getSuppliers(String search) {
-		Specification<Supplier> spec = SupplierSpecification.filterByName(search);
-		List<Supplier> suppliers = supplierRepository.findAll(spec);
+	private void validateSupplierUniqueness(String name, Long id) {
+		if (id == null) {
+			if (supplierRepository.existsByNameIgnoreCase(name)) {
+				LOGGER.error("Supplier name already exists: {}", name);
+				throw new DuplicateSupplierException("Supplier already exists with name: " + name);
+			}
+		} else {
+			if (supplierRepository.existsByNameIgnoreCaseAndIdNot(name, id)) {
+				LOGGER.error("Supplier name already exists for another ID: {}", name);
+				throw new DuplicateSupplierException("Supplier already exists with name: " + name);
+			}
+		}
+	}
 
-		LOGGER.info("Returned {} suppliers", suppliers.size());
-		return suppliers.stream().map(supplier -> modelMapper.map(supplier, SupplierResponse.class))
-				.collect(Collectors.toList());
+	private Supplier getSupplierOrThrow(Long id) {
+		return supplierRepository.findById(id).orElseThrow(() -> {
+			LOGGER.error("Supplier not found with ID: {}", id);
+			return new SupplierNotFoundException("Supplier not found with ID: " + id);
+		});
 	}
 
 }

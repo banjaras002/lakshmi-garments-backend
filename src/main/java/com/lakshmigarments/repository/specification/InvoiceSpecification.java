@@ -11,6 +11,7 @@ import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
 import org.springframework.data.jpa.domain.Specification;
 
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 
@@ -66,21 +67,35 @@ public class InvoiceSpecification {
     }
 
 
-    public static Specification<Invoice> filterByInvoiceDateBetween(Date startDate, Date endDate) {
+    public static Specification<Invoice> filterByInvoiceDateBetween(LocalDate startDate, LocalDate endDate) {
         return (root, query, criteriaBuilder) -> {
-            if (startDate != null && endDate != null) {
-                return criteriaBuilder.between(root.get("invoiceDate"), startDate, endDate);
+            if (startDate == null && endDate == null) {
+                return criteriaBuilder.conjunction();
             }
-            return criteriaBuilder.conjunction(); // No filter applied if dates are null
+            if (startDate != null && endDate == null) {
+                return criteriaBuilder.greaterThanOrEqualTo(root.get("invoiceDate"), startDate);
+            }
+            if (startDate == null && endDate != null) {
+                LocalDate defaultStart = LocalDate.of(2000, 1, 1);
+                return criteriaBuilder.between(root.get("invoiceDate"), defaultStart, endDate);
+            }
+            return criteriaBuilder.between(root.get("invoiceDate"), startDate, endDate);
         };
     }
-    
-    public static Specification<Invoice> filterByReceivedDateBetween(Date startDate, Date endDate) {
+
+    public static Specification<Invoice> filterByReceivedDateBetween(LocalDate startDate, LocalDate endDate) {
         return (root, query, criteriaBuilder) -> {
-            if (startDate != null && endDate != null) {
-                return criteriaBuilder.between(root.get("receivedDate"), startDate, endDate);
+            if (startDate == null && endDate == null) {
+                return criteriaBuilder.conjunction();
             }
-            return criteriaBuilder.conjunction(); // No filter applied if dates are null
+            if (startDate != null && endDate == null) {
+                return criteriaBuilder.greaterThanOrEqualTo(root.get("receivedDate"), startDate);
+            }
+            if (startDate == null && endDate != null) {
+                LocalDate defaultStart = LocalDate.of(2000, 1, 1);
+                return criteriaBuilder.between(root.get("receivedDate"), defaultStart, endDate);
+            }
+            return criteriaBuilder.between(root.get("receivedDate"), startDate, endDate);
         };
     }
     

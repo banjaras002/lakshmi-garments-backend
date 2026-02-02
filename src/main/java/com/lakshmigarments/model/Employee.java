@@ -22,7 +22,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Employee {
+public class Employee extends BaseAuditable {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -22,7 +22,6 @@ public interface JobworkItemRepository extends JpaRepository<JobworkItem, Long> 
 	@Query(value = "SELECT DISTINCT i.name FROM jobworks jw JOIN jobwork_items jwi ON jwi.jobwork_id = jw.id "
 			+ "JOIN items i ON i.id = jwi.item_id WHERE jw.jobwork_number = :jobworkNumber", nativeQuery = true)
 	List<String> findItemNamesByJobworkNumber(@Param("jobworkNumber") String jobworkNumber);
-
 	
 	Optional<JobworkItem> findByItemNameAndJobworkJobworkNumber(String itemName, String jobworkNumber);
 	

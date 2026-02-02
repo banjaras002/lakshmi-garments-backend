@@ -45,5 +45,8 @@ public interface BatchRepository extends JpaRepository<Batch, Long>, JpaSpecific
 	
 	@Query(value = "SELECT b.serial_code FROM batches b WHERE b.batch_status NOT IN ('DISCARDED','CLOSED')", nativeQuery = true)
 	List<String> findAllBatchSerialCodesForJobwork();
+	
+	@Query(value = "SELECT DISTINCT b.serial_code FROM batches b", nativeQuery = true)
+	List<String> getAllBatchSerialCodes();
 
 }

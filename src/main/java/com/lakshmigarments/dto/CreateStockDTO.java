@@ -1,6 +1,7 @@
 package com.lakshmigarments.dto;
 
 import java.sql.Date;
+import java.time.LocalDate;
 import java.util.List;
 
 import org.hibernate.annotations.CreationTimestamp;
@@ -27,11 +28,11 @@ public class CreateStockDTO {
 	
 	@PastOrPresent
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
-	private Date invoiceDate;
+	private LocalDate invoiceDate;
 	
 	@PastOrPresent
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
-	private Date receivedDate;
+	private LocalDate receivedDate;
 	
 	@NotNull(message = "Supplier ID is mandatory")
 	@Positive(message = "Supplier ID should be positive")

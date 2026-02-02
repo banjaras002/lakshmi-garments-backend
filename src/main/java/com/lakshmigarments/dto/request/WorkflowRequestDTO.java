@@ -1,10 +1,11 @@
-package com.lakshmigarments.model;
+package com.lakshmigarments.dto.request;
 
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
+//@JsonIgnoreProperties(ignoreUnknown = true)
 public class WorkflowRequestDTO {
 
 	private String requestType;

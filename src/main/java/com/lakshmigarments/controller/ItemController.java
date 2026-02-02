@@ -1,62 +1,57 @@
 package com.lakshmigarments.controller;
 
-import com.lakshmigarments.dto.ItemRequestDTO;
-import com.lakshmigarments.dto.response.BatchItemResponse;
-import com.lakshmigarments.service.ItemService;
-import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
+import com.lakshmigarments.dto.request.ItemRequest;
+import com.lakshmigarments.dto.response.ItemResponse;
+import com.lakshmigarments.service.ItemService;
+
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/items")
-@CrossOrigin(origins = "*", allowedHeaders = "*")
 @RequiredArgsConstructor
 public class ItemController {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ItemController.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(ItemController.class);
 
-    private final ItemService itemService;
+	private final ItemService itemService;
 
-    @GetMapping
-    public ResponseEntity<List<BatchItemResponse>> getAllItems(@RequestParam(required = false) String search){
-        LOGGER.info("Received request to get all items");
-        List<BatchItemResponse> itemResponseDTO = itemService.getAllItems(search);
-        LOGGER.info("Items retrieved successfully");
-        return ResponseEntity.status(HttpStatus.OK).body(itemResponseDTO);
-    }
+	@GetMapping
+	public ResponseEntity<List<ItemResponse>> getAllItems(@RequestParam(required = false) String search) {
+		LOGGER.info("Received request to fetch all items matching: {}", search);
+		List<ItemResponse> items = itemService.getAllItems(search);
+		return ResponseEntity.ok(items);
+	}
 
-    @PostMapping
-    public ResponseEntity<BatchItemResponse> createItem(@Valid @RequestBody ItemRequestDTO itemRequestDTO){
-        LOGGER.info("Received request to create item: {}", itemRequestDTO.getName());
-        BatchItemResponse itemResponseDTO = itemService.createItem(itemRequestDTO);
-        LOGGER.info("Item created successfully with ID: {}", itemResponseDTO.getId());
-        return ResponseEntity.status(HttpStatus.CREATED).body(itemResponseDTO);
-    }
+	@PostMapping
+	public ResponseEntity<ItemResponse> createItem(
+			@RequestBody @Valid ItemRequest request) {
+		LOGGER.info("Received request to create item: {}", request.getName());
+		ItemResponse response = itemService.createItem(request);
+		return new ResponseEntity<>(response, HttpStatus.CREATED);
+	}
 
-    @PutMapping("/{id}")
-    public ResponseEntity<BatchItemResponse> updateItem(@PathVariable Long id, @Valid @RequestBody ItemRequestDTO itemRequestDTO){
-        LOGGER.info("Received request to update item with ID: {}", id);
-        BatchItemResponse itemResponseDTO = itemService.updateItem(id, itemRequestDTO);
-        LOGGER.info("Item updated successfully with ID: {}", itemResponseDTO.getId());
-        return ResponseEntity.status(HttpStatus.OK).body(itemResponseDTO);
-    }
+	@PutMapping("/{id}")
+	public ResponseEntity<ItemResponse> updateItem(@PathVariable Long id,
+			@RequestBody @Valid ItemRequest request) {
+		LOGGER.info("Received request to update item ID: {}", id);
+		ItemResponse response = itemService.updateItem(id, request);
+		return ResponseEntity.ok(response);
+	}
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Boolean> deleteItem(@PathVariable Long id){
-        LOGGER.info("Received request to delete item with ID: {}", id);
-        boolean isDeleted = itemService.deleteItem(id);
-        if(isDeleted){
-            LOGGER.info("Item deleted successfully with ID: {}", id);
-            return ResponseEntity.status(HttpStatus.OK).body(true);
-        } else {
-            LOGGER.warn("Item not found with ID: {}", id);
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(false);
-        }
-    }
 }

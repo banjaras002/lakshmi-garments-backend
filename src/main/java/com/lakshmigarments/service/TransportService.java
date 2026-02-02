@@ -1,19 +1,15 @@
 package com.lakshmigarments.service;
 
 import java.util.List;
+import com.lakshmigarments.dto.request.TransportRequest;
+import com.lakshmigarments.dto.response.TransportResponse;
 
-import org.springframework.stereotype.Service;
-
-import com.lakshmigarments.dto.TransportRequestDTO;
-import com.lakshmigarments.dto.TransportResponseDTO;
-
-@Service
 public interface TransportService {
 
-    TransportResponseDTO createTransport(TransportRequestDTO transportRequestDTO);
+    TransportResponse createTransport(TransportRequest transportRequest);
 
-    List<TransportResponseDTO> getAllTransports(String search);
+    List<TransportResponse> getAllTransports(String search);
 
-    TransportResponseDTO updateTransport(Long id, TransportRequestDTO transportRequestDTO);
+    TransportResponse updateTransport(Long id, TransportRequest transportRequest);
 
 }

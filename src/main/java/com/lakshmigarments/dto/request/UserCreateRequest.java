@@ -8,8 +8,9 @@ import lombok.Data;
 public class UserCreateRequest {
 	
 	@NotBlank(message = "First name is required")
+	@Size(min = 3, message = "First name size should be 3 at minimum")
 	private String firstName;
-	
+
 	private String lastName;
 	
 	@NotBlank(message = "Username is required")

@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.lakshmigarments.dto.request.ChangePasswordRequest;
 import com.lakshmigarments.dto.request.UserCreateRequest;
 import com.lakshmigarments.dto.request.UserUpdateRequest;
 import com.lakshmigarments.dto.response.UserResponse;
@@ -43,10 +44,18 @@ public class UserController {
 	        @RequestParam(required = false) List<String> roles,
 	        @RequestParam(required = false) List<Boolean> isActive) {
 
-	    LOGGER.info("Fetching all users with filters - Search: {}, Roles: {}", search, roles);
+	    LOGGER.debug("REST request to get users - search: {}, roles: {}, isActive: {}, pageable: {}", 
+	            search, roles, isActive, pageable);
 
 	    Page<UserResponse> users = userService.getPaginatedUsers(pageable, search, roles, isActive);
-	    return new ResponseEntity<>(users, HttpStatus.OK);
+	    return ResponseEntity.ok(users);
+	}
+
+	@GetMapping("/{username}")
+	public ResponseEntity<UserResponse> getUserByUsername(@PathVariable String username) {
+		LOGGER.info("REST request to get user by username: {}", username);
+		UserResponse userResponse = userService.getUserByUsername(username);
+		return ResponseEntity.ok(userResponse);
 	}
 
 	@PostMapping
@@ -59,14 +68,22 @@ public class UserController {
 	@PutMapping("/{id}")
 	public ResponseEntity<UserResponse> updateUser(@PathVariable Long id, 
 			@RequestBody @Valid UserUpdateRequest userUpdateRequest) {
-		LOGGER.info("Updating user with username: {}", userUpdateRequest.getUsername());
+		LOGGER.info("REST request to update user ID: {} with username: {}", id, userUpdateRequest.getUsername());
 		UserResponse updatedUser = userService.updateUser(id, userUpdateRequest);
 		return ResponseEntity.ok(updatedUser);
 	}
 	
+	@PatchMapping("/{username}/change-password")
+	public ResponseEntity<Void> changePassword(@PathVariable String username, 
+			@RequestBody @Valid ChangePasswordRequest changePasswordRequest) {
+		LOGGER.info("REST request to change password for user: {}", username);
+		userService.changePassword(username, changePasswordRequest);
+		return ResponseEntity.noContent().build();
+	}
+
 	@PatchMapping("/{id}/reset-password")
 	public ResponseEntity<String> resetPassword(@PathVariable Long id) {
-		LOGGER.info("Resetting password for the user with ID {}", id);
+		LOGGER.info("REST request to reset password for user ID: {}", id);
 	    String newPassword = userService.adminResetPassword(id);
 	    return ResponseEntity.ok(newPassword);
 	}

@@ -1,6 +1,7 @@
 package com.lakshmigarments.dto;
 
 import java.sql.Date;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import org.springframework.format.annotation.DateTimeFormat;
@@ -19,10 +20,10 @@ public class InvoiceDTO {
 	private String invoiceNumber;
 	
 	@DateTimeFormat(pattern = "dd/MM/yyyy")
-	private Date invoiceDate;
+	private LocalDate invoiceDate;
 	
 	@DateTimeFormat(pattern = "dd/MM/yyyy")
-	private Date receivedDate;
+	private LocalDate receivedDate;
 	
 	private String supplierName;
 	

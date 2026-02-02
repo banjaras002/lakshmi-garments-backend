@@ -35,7 +35,9 @@ import com.lakshmigarments.dto.BatchSerialDTO;
 import com.lakshmigarments.dto.BatchTimelineDTO;
 import com.lakshmigarments.dto.BatchTimelineDetail;
 import com.lakshmigarments.dto.BatchResponseDTO.BatchSubCategoryResponseDTO;
+import com.lakshmigarments.interceptor.UserContextInterceptor;
 import com.lakshmigarments.model.Batch;
+import com.lakshmigarments.model.BatchItem;
 import com.lakshmigarments.model.BatchStatus;
 import com.lakshmigarments.model.BatchSubCategory;
 import com.lakshmigarments.model.Category;
@@ -72,6 +74,7 @@ import com.lakshmigarments.repository.JobworkReceiptRepository;
 import com.lakshmigarments.repository.JobworkRepository;
 import com.lakshmigarments.repository.MaterialLedgerRepository;
 import com.lakshmigarments.repository.SubCategoryRepository;
+import com.lakshmigarments.repository.BatchItemRepository;
 import com.lakshmigarments.repository.UserRepository;
 import com.lakshmigarments.repository.specification.BatchSpecification;
 import com.lakshmigarments.service.BatchService;
@@ -103,6 +106,7 @@ public class BatchServiceImpl implements BatchService {
 	private final UserRepository userRepository;
 	private final ModelMapper modelMapper;
 	private final MaterialLedgerRepository ledgerRepository;
+	private final BatchItemRepository batchItemRepository;
 
 	DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMMM yyyy, hh:mm a");
 
@@ -368,6 +372,17 @@ public class BatchServiceImpl implements BatchService {
 				.map(batchSubCategory -> modelMapper.map(batchSubCategory, BatchSubCategoryResponseDTO.class))
 				.collect(Collectors.toList());
 		batchResponseDTO.setSubCategories(batchSubCategoryResponseDTOs);
+
+		List<BatchItem> batchItems = batchItemRepository.findByBatchId(batch.getId());
+		List<BatchResponseDTO.BatchItemResponse> itemResponseDTOs = batchItems.stream().map(batchItem -> {
+			BatchResponseDTO.BatchItemResponse itemResponse = new BatchResponseDTO.BatchItemResponse();
+			itemResponse.setId(batchItem.getId());
+			itemResponse.setItemName(batchItem.getItem() != null ? batchItem.getItem().getName() : null);
+			itemResponse.setQuantity(batchItem.getQuantity());
+			return itemResponse;
+		}).collect(Collectors.toList());
+		batchResponseDTO.setItems(itemResponseDTOs);
+
 		return batchResponseDTO;
 	}
 
@@ -445,10 +460,38 @@ public class BatchServiceImpl implements BatchService {
 				.flatMap(receipt -> receipt.getJobworkReceiptItems().stream())
 				.map(JobworkReceiptItem::getAcceptedQuantity).filter(Objects::nonNull).mapToLong(Long::longValue).sum()
 				: 0L;
-		LOGGER.debug("Accepted quantities received for batch {} from CUTTING jobs : {}", batchSerialCode, totalAcceptedQuantity);
-		if (totalAcceptedQuantity > 0) {
+		LOGGER.debug("Accepted quantities received for batch {} from CUTTING jobs : {}", batchSerialCode,
+				totalAcceptedQuantity);
+
+		// conditions for removing stitching
+		Long assignedStitchingQuantities = jobworkRepository.getAssignedQuantities(batchSerialCode,
+				JobworkType.STITCHING.name());
+		Long damagedRepairableStitchingQuantities = damageRepository.getDamagedQuantity(batchSerialCode,
+				DamageType.REPAIRABLE.name(), JobworkType.STITCHING.name());
+		long availableForStitching = totalAcceptedQuantity - assignedStitchingQuantities
+				+ damagedRepairableStitchingQuantities;
+
+		if (availableForStitching > 0) {
 			allowedJobworkTypes.add(JobworkType.STITCHING);
 		}
+
+		// conditions for adding stitching
+		List<JobworkReceipt> stitchingJobworkReceipts = receiptRepository
+				.findByJobworkBatchSerialCodeAndJobworkJobworkType(batchSerialCode, JobworkType.STITCHING);
+		LOGGER.debug("Fetched {} jobwork receipts for STITCHING of batch {}", stitchingJobworkReceipts.size(),
+				batchSerialCode);
+
+		Long totalAcceptedQuantityForStitching = !stitchingJobworkReceipts.isEmpty() ? stitchingJobworkReceipts.stream()
+				.flatMap(receipt -> receipt.getJobworkReceiptItems().stream())
+				.map(JobworkReceiptItem::getAcceptedQuantity).filter(Objects::nonNull).mapToLong(Long::longValue).sum()
+				: 0L;
+		LOGGER.debug("Accepted quantities received for batch {} from STITCHING jobs : {}", batchSerialCode,
+				totalAcceptedQuantityForStitching);
+
+		if (totalAcceptedQuantityForStitching > 0) {
+			allowedJobworkTypes.add(JobworkType.PACKAGING);
+		}
+
 		return allowedJobworkTypes;
 	}
 
@@ -564,12 +607,13 @@ public class BatchServiceImpl implements BatchService {
 
 			}
 
-			List<Damage> damages = jobworkReceipt.getDamages();
-			for (Damage damage : damages) {
-				if (damage.getDamageType() != DamageType.REPAIRABLE) {
-					totalQuantities -= damage.getQuantity();
-				}
-			}
+			long totalDamages = jobworkReceipt.getJobworkReceiptItems().stream()
+					.flatMap(item -> item.getDamages().stream()) // flatten all damage lists
+					.filter(damage -> damage.getDamageType() != DamageType.REPAIRABLE).mapToLong(Damage::getQuantity)
+					.sum();
+
+			totalQuantities -= totalDamages;
+
 		}
 
 		return totalQuantities;
@@ -607,20 +651,22 @@ public class BatchServiceImpl implements BatchService {
 
 	public void recalculateBatchStatus(Batch batch) {
 
-	    List<Jobwork> jobworks = jobworkRepository.findByBatch(batch);
+		List<Jobwork> jobworks = jobworkRepository.findByBatch(batch);
 
-	    if (jobworks.isEmpty()) {
-	        batch.setBatchStatus(BatchStatus.CREATED);
-	        LOGGER.debug("Marked the status of batch {} as {}", batch.getSerialCode(), BatchStatus.CREATED);
-	    } else if (jobworks.stream().anyMatch(jw -> jw.getJobworkStatus() == JobworkStatus.IN_PROGRESS || jw.getJobworkStatus() == JobworkStatus.AWAITING_CLOSE)) {
-	        batch.setBatchStatus(BatchStatus.ASSIGNED);
-	        LOGGER.debug("Marked the status of batch {} as {}", batch.getSerialCode(), BatchStatus.ASSIGNED);
-	    } else if (jobworks.stream().allMatch(jw -> jw.getJobworkStatus() == JobworkStatus.CLOSED)) {
-	        batch.setBatchStatus(BatchStatus.COMPLETED);
-	        LOGGER.debug("Marked the status of batch {} as {}", batch.getSerialCode(), BatchStatus.COMPLETED);
-	    }
+		if (jobworks.isEmpty()) {
+			batch.setBatchStatus(BatchStatus.CREATED);
+			LOGGER.debug("Marked the status of batch {} as {}", batch.getSerialCode(), BatchStatus.CREATED);
+		} else if (jobworks.stream().anyMatch(jw -> jw.getJobworkStatus() == JobworkStatus.IN_PROGRESS
+				|| jw.getJobworkStatus() == JobworkStatus.AWAITING_CLOSE)) {
+			batch.setBatchStatus(BatchStatus.ASSIGNED);
+			LOGGER.debug("Marked the status of batch {} as {}", batch.getSerialCode(), BatchStatus.ASSIGNED);
+		} else if (jobworks.stream().allMatch(jw -> jw.getJobworkStatus() == JobworkStatus.CLOSED
+				|| jw.getJobworkStatus() == JobworkStatus.REASSIGNED)) {
+			batch.setBatchStatus(BatchStatus.COMPLETED);
+			LOGGER.debug("Marked the status of batch {} as {}", batch.getSerialCode(), BatchStatus.COMPLETED);
+		}
 
-	    batchRepository.save(batch);
+		batchRepository.save(batch);
 	}
 
 //	private Employee getEmployeeOrThrow(String name) {
@@ -635,6 +681,12 @@ public class BatchServiceImpl implements BatchService {
 			LOGGER.error("Batch not found: {}", serialCode);
 			return new BatchNotFoundException("Batch not found: " + serialCode);
 		});
+	}
+
+	@Override
+	public List<String> getAllBatchSerialCode() {
+		LOGGER.debug("Fetchging all the batch serial codes");
+		return batchRepository.getAllBatchSerialCodes();
 	}
 
 }

@@ -1,5 +1,7 @@
 package com.lakshmigarments.controller;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -18,9 +20,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.lakshmigarments.dto.BatchRequestDTO;
-import com.lakshmigarments.dto.WorkflowResponseDTO;
+import com.lakshmigarments.dto.request.WorkflowRequestDTO;
+import com.lakshmigarments.dto.response.WorkflowResponse;
 import com.lakshmigarments.model.WorkflowRequest;
-import com.lakshmigarments.model.WorkflowRequestDTO;
+import com.lakshmigarments.model.WorkflowRequestStatus;
+import com.lakshmigarments.model.WorkflowRequestType;
 import com.lakshmigarments.service.ExcelFileGeneratorService;
 import com.lakshmigarments.service.WorkflowRequestService;
 
@@ -45,14 +49,18 @@ public class WorkflowRequestController {
 	}
 	
 	@GetMapping
-	public Page<WorkflowResponseDTO> getWorkflowRequests(
-				@RequestParam(required = false) Integer pageNo,
-	            @RequestParam(required = false) Integer pageSize,
-	            @RequestParam(required = false, defaultValue = "requestedAt") String sortBy,
-	            @RequestParam(required = false, defaultValue = "desc") String sortDir,
-	            @RequestParam(required = false) List<String> requestedByNames
-			) {
-		return requestService.getAllWorkflowRequests(pageNo, pageSize, sortBy, sortDir, requestedByNames);
+	public Page<WorkflowResponse> getWorkflowRequests(
+			@RequestParam(required = false) Integer pageNo,
+			@RequestParam(required = false) Integer pageSize,
+			@RequestParam(required = false, defaultValue = "createdAt") String sortBy,
+			@RequestParam(required = false, defaultValue = "desc") String sortDir,
+			@RequestParam(required = false) List<String> requestedByNames,
+			@RequestParam(required = false) List<WorkflowRequestType> requestTypes,
+			@RequestParam(required = false) List<WorkflowRequestStatus> statuses,
+			@RequestParam(required = false) LocalDate startDate,
+			@RequestParam(required = false) LocalDate endDate) {
+		return requestService.getAllWorkflowRequests(pageNo, pageSize, sortBy, sortDir, requestedByNames, requestTypes,
+				statuses, startDate, endDate);
 	}
 	
 	@PutMapping("/{id}")
@@ -63,9 +71,9 @@ public class WorkflowRequestController {
 	}
 	
 	@GetMapping("/{id}")
-	public ResponseEntity<WorkflowResponseDTO> getWorkflowRequest(
+	public ResponseEntity<WorkflowResponse> getWorkflowRequest(
 			@PathVariable Long id){
-		WorkflowResponseDTO responseDTO = requestService.getWorkflowRequest(id);
+		WorkflowResponse responseDTO = requestService.getWorkflowRequest(id);
 		return new ResponseEntity<>(responseDTO, HttpStatus.ACCEPTED);
 	}
 	

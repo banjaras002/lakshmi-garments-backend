@@ -1,24 +1,15 @@
 package com.lakshmigarments.service;
 
-import com.lakshmigarments.dto.ItemRequestDTO;
-import com.lakshmigarments.dto.response.BatchItemResponse;
-
-import jakarta.transaction.Transactional;
-import org.springframework.stereotype.Service;
-
 import java.util.List;
+import com.lakshmigarments.dto.request.ItemRequest;
+import com.lakshmigarments.dto.response.ItemResponse;
 
-@Service
 public interface ItemService {
 
-    @Transactional
-    BatchItemResponse createItem(ItemRequestDTO item);
+    ItemResponse createItem(ItemRequest itemRequest);
 
-    @Transactional
-    BatchItemResponse updateItem(Long id, ItemRequestDTO itemRequestDTO);
+    ItemResponse updateItem(Long id, ItemRequest itemRequest);
 
-    @Transactional
-    boolean deleteItem(Long id);
+    List<ItemResponse> getAllItems(String search);
 
-    List<BatchItemResponse> getAllItems(String search);
 }
