@@ -54,5 +54,25 @@ public interface InvoiceRepository extends JpaRepository<Invoice, Long>, JpaSpec
 	
 	boolean existsByInvoiceNumberAndSupplierId(String invNo, Long supplierId);
 	
+	@Query("SELECT COALESCE(SUM(b.quantity * b.price), 0) FROM Invoice i JOIN i.lorryReceipts lr JOIN lr.bales b " +
+           "WHERE i.receivedDate BETWEEN :startDate AND :endDate")
+    Double findTotalRevenueBetweenDates(java.time.LocalDate startDate, java.time.LocalDate endDate);
+	
+	@Query("SELECT COUNT(*) FROM Invoice i " +
+	           "WHERE i.receivedDate BETWEEN :startDate AND :endDate")
+	    Double findTotalInvoiceCountBetweenDates(java.time.LocalDate startDate, java.time.LocalDate endDate);
+
+    @Query("SELECT COALESCE(SUM(i.transportCost), 0) FROM Invoice i WHERE i.isPaid = false")
+    Double findTotalPendingTransportPayments();
+    
+    @Query("SELECT COUNT(i) FROM Invoice i WHERE i.isPaid = false")
+    Long countPendingInvoices();
+
+    @Query("SELECT i.supplier.name, SUM(b.quantity * b.price) FROM Invoice i JOIN i.lorryReceipts lr JOIN lr.bales b " +
+           "WHERE i.receivedDate BETWEEN :startDate AND :endDate " +
+           "GROUP BY i.supplier.name")
+    List<Object[]> findSupplierPerformanceBetweenDates(java.time.LocalDate startDate, java.time.LocalDate endDate);
+
+	
 	
 }

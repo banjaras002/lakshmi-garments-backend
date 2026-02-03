@@ -40,5 +40,34 @@ public interface MaterialLedgerRepository extends JpaRepository<MaterialInventor
 		        @Param("subCategoryId") Long subCategoryId
 		);
 
-	
+	@Query("SELECT i.category.name, SUM(CASE WHEN i.direction = 'IN' THEN i.quantity ELSE -i.quantity END) " +
+           "FROM MaterialInventoryLedger i " +
+           "WHERE i.createdAt BETWEEN :startDate AND :endDate " +
+           "GROUP BY i.category.name")
+    List<Object[]> findCategoryDistributionBetweenDates(java.time.LocalDateTime startDate, java.time.LocalDateTime endDate);
+
+    @Query("SELECT i.subCategory.name, SUM(CASE WHEN i.direction = 'IN' THEN i.quantity ELSE -i.quantity END), i.category.name " +
+           "FROM MaterialInventoryLedger i " +
+           "WHERE i.createdAt BETWEEN :startDate AND :endDate " +
+           "GROUP BY i.subCategory.name, i.category.name")
+    List<Object[]> findSubCategoryDistributionBetweenDates(java.time.LocalDateTime startDate, java.time.LocalDateTime endDate);
+
+    @Query("SELECT FUNCTION('DATE', i.createdAt), SUM(i.quantity) " +
+           "FROM MaterialInventoryLedger i " +
+           "WHERE i.direction = 'IN' AND i.createdAt BETWEEN :startDate AND :endDate " +
+           "GROUP BY FUNCTION('DATE', i.createdAt)")
+    List<Object[]> findQuantityTrendBetweenDates(java.time.LocalDateTime startDate, java.time.LocalDateTime endDate);
+
+
+    @Query("SELECT COALESCE(SUM(i.quantity), 0) FROM MaterialInventoryLedger i " +
+           "WHERE i.direction = 'IN' AND i.createdAt BETWEEN :startDate AND :endDate")
+    Long findTotalQuantityProcessedBetweenDates(java.time.LocalDateTime startDate, java.time.LocalDateTime endDate);
+
+    @Query("SELECT COALESCE(SUM(i.quantity * (SELECT COALESCE(AVG(b.price), 0) FROM Bale b WHERE b.subCategory = i.subCategory)), 0) " +
+           "FROM MaterialInventoryLedger i " +
+           "WHERE i.direction = 'IN' AND i.createdAt BETWEEN :startDate AND :endDate")
+    Double calculateWeeklyInventoryValue(@Param("startDate") java.time.LocalDateTime startDate, @Param("endDate") java.time.LocalDateTime endDate);
+
 }
+
+

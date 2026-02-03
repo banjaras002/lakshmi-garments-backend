@@ -49,4 +49,8 @@ public interface InventoryRepository extends JpaRepository<Inventory, Long> {
     
     boolean existsByCategoryIdAndSubCategoryId(Long categoryId, Long subCategoryId);
     
+    @Query("SELECT COALESCE(SUM(i.count * (SELECT COALESCE(AVG(b.price), 0) FROM Bale b WHERE b.subCategory = i.subCategory)), 0) FROM Inventory i")
+    Double calculateTotalInventoryValuation();
+
 }
+
