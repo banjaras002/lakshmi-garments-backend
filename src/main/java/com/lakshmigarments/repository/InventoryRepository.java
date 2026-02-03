@@ -21,7 +21,7 @@ public interface InventoryRepository extends JpaRepository<Inventory, Long> {
 		       "(SUM(i.count) * 100.0 / " +
 		       " (SELECT SUM(i2.count) FROM Inventory i2 WHERE i2.category = i.category)) " +
 		       "FROM Inventory i " +
-		       "GROUP BY i.category, i.subCategory.name")
+		       "GROUP BY i.category.name, i.subCategory.name")
 		List<Object[]> getCategorySubCategoryCountWithPercentage();
 
 
